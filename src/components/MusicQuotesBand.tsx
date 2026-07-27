@@ -1,7 +1,28 @@
 import { useEffect, useState } from 'react';
 import { Box, Typography } from '@mui/material';
 import MusicNoteIcon from '@mui/icons-material/MusicNote';
-import { cartoonTitle, HERO_VIOLET, INK, YELLOW } from '../theme';
+import WaveEdge from './WaveEdge';
+import { cartoonTitle, HERO_VIOLET, INK, PAGE_BG, YELLOW } from '../theme';
+
+/** Статья под цитатой: коротко о том, из чего состоит греческая песня */
+const ARTICLE: { head: string; text: string }[] = [
+  {
+    head: 'Песня как вход в язык',
+    text: 'Греческий проще всего входит через песню. Слова в ней повторяются, рифма держит порядок, а мелодия сама расставляет ударения — те самые, что в греческом всегда обозначены на письме. Услышав строку несколько раз, вы запоминаете её целиком, вместе с интонацией живой речи, а не отдельными словами из списка.',
+  },
+  {
+    head: 'Δημοτικά — народная песня',
+    text: 'Старейший пласт: песни областей, каждая со своим ладом и своим танцем. Каламатьянос водят по кругу, взявшись за руки, сиртос идёт мягкой цепочкой, зейбекикос танцуют в одиночку. Эти песни пережили века без нот и без авторов — их передавали голосом, и в них сохранился язык деревни, моря и дороги.',
+  },
+  {
+    head: 'Ρεμπέτικο — песня портов',
+    text: 'Городской жанр, выросший в кварталах Пирея и Салоник. После 1922 года в Грецию хлынули беженцы из Малой Азии и принесли восточные лады. Так родилось ремпетико — песни о разлуке, бедности и упрямой радости, под бузуки с его длинным грифом и звонкими парами струн. В 2017 году ЮНЕСКО внесло ремпетико в список нематериального наследия человечества.',
+  },
+  {
+    head: 'Λαϊκό и έντεχνο — от таверны до поэзии',
+    text: 'Из ремпетико выросло лаико — народная городская песня, которую и сегодня поют по всей стране. А рядом появилось «энтехно»: Микис Теодоракис и Манос Хадзидакис положили на музыку стихи Сефериса, Элитиса, Рицоса — поэтов, двое из которых получили Нобелевскую премию. Получилась редкая вещь: большая поэзия, которую знают наизусть и напевают за столом.',
+  },
+];
 
 /**
  * Что показываем в полосе: греческая строка и пояснение по-русски.
@@ -73,13 +94,20 @@ export default function MusicQuotesBand() {
         transform: 'translateX(-50%)',
         bgcolor: HERO_VIOLET,
         overflow: 'hidden',
-        minHeight: { xs: 150, sm: 175, md: 200 },
-        display: 'grid',
-        placeItems: 'center',
-        px: { xs: 2.5, sm: 4 },
-        py: { xs: 2.5, md: 3 },
       }}
     >
+      {/* волна сверху — такая же, как переход под шапкой на главной */}
+      <WaveEdge color={PAGE_BG} flip />
+
+      <Box
+        sx={{
+          position: 'relative',
+          px: { xs: 2.5, sm: 4 },
+          py: { xs: 2, md: 3 },
+          display: 'grid',
+          placeItems: 'center',
+        }}
+      >
       {/* нотки по краям — лёгкий намёк на тему, не отвлекают */}
       <MusicNoteIcon
         aria-hidden
@@ -136,7 +164,69 @@ export default function MusicQuotesBand() {
         >
           {item.ru}
         </Typography>
+        </Box>
+
+        {/* статья: коротко о том, из чего состоит греческая песня */}
+        <Box
+          component="article"
+          sx={{
+            mt: { xs: 3.5, md: 5 },
+            maxWidth: 980,
+            textAlign: 'left',
+            color: 'rgba(255,255,255,0.94)',
+          }}
+        >
+          <Typography
+            component="h2"
+            sx={{
+              ...cartoonTitle,
+              fontWeight: 900,
+              WebkitTextStroke: `1.2px ${INK}`,
+              color: YELLOW,
+              fontSize: { xs: 22, sm: 27, md: 31 },
+              textAlign: 'center',
+              mb: { xs: 2, md: 3 },
+            }}
+          >
+            Немного о греческой музыке
+          </Typography>
+
+          <Box
+            sx={{
+              display: 'grid',
+              gap: { xs: 2.25, md: 3 },
+              gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
+            }}
+          >
+            {ARTICLE.map((p) => (
+              <Box key={p.head}>
+                <Typography
+                  sx={{
+                    fontWeight: 900,
+                    color: YELLOW,
+                    fontSize: { xs: 16, md: 18 },
+                    mb: 0.5,
+                  }}
+                >
+                  {p.head}
+                </Typography>
+                <Typography
+                  sx={{
+                    fontWeight: 500,
+                    fontSize: { xs: 14.5, md: 16 },
+                    lineHeight: 1.55,
+                  }}
+                >
+                  {p.text}
+                </Typography>
+              </Box>
+            ))}
+          </Box>
+        </Box>
       </Box>
+
+      {/* волна снизу — тот же переход, что и сверху */}
+      <WaveEdge color={PAGE_BG} />
     </Box>
   );
 }

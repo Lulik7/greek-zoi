@@ -4,7 +4,8 @@ import EmailIcon from '@mui/icons-material/Email';
 import TelegramIcon from '@mui/icons-material/Telegram';
 import InstagramIcon from '@mui/icons-material/Instagram';
 import { useApp } from '../store/AppContext';
-import { YELLOW } from '../theme';
+import WaveEdge from './WaveEdge';
+import { PAGE_BG, YELLOW } from '../theme';
 
 export default function Footer() {
   const { db } = useApp();
@@ -35,6 +36,8 @@ export default function Footer() {
         background: 'linear-gradient(165deg, #7C7ACF 0%, #5F5BB8 50%, #21195F 100%)',
       }}
     >
+      {/* волна сверху — такая же, как переход под шапкой и у блока о музыке */}
+      <WaveEdge color={PAGE_BG} flip />
       <Container maxWidth="lg" sx={{ py: { xs: 4, md: 6 }, textAlign: 'center' }}>
         <Typography
           component="div"
