@@ -14,7 +14,7 @@ import {
 import { useApp } from '../store/AppContext';
 
 export default function AccountPage() {
-  const { db, user, hasSubscription } = useApp();
+  const { db, user, isAdmin, hasSubscription } = useApp();
 
   if (!user) {
     return (
@@ -39,24 +39,32 @@ export default function AccountPage() {
           <Typography color="text.secondary">{user.email}</Typography>
           <Divider sx={{ my: 2 }} />
           <Stack direction="row" spacing={1} useFlexGap sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
-            <Chip
-              color={hasSubscription ? 'success' : 'default'}
-              label={hasSubscription ? 'Подписка активна' : 'Подписки нет'}
-            />
+            {/*
+              Администратору подписка не нужна: он ведёт каталог и видит всё.
+              Показывать ему статус, тариф и срок — только сбивать с толку.
+            */}
+            {isAdmin ? (
+              <Chip color="primary" label="Администратор" />
+            ) : (
+              <Chip
+                color={hasSubscription ? 'success' : 'default'}
+                label={hasSubscription ? 'Подписка активна' : 'Подписки нет'}
+              />
+            )}
             <Chip
               variant="outlined"
               color={user.emailVerified ? 'success' : 'warning'}
               label={user.emailVerified ? 'Почта подтверждена' : 'Почта не подтверждена'}
             />
-            {plan && <Chip variant="outlined" label={`Тариф: ${plan.title}`} />}
-            {user.subscription.until && (
+            {!isAdmin && plan && <Chip variant="outlined" label={`Тариф: ${plan.title}`} />}
+            {!isAdmin && user.subscription.until && (
               <Chip
                 variant="outlined"
                 label={`До ${new Date(user.subscription.until).toLocaleDateString('ru-RU')}`}
               />
             )}
           </Stack>
-          {!hasSubscription && (
+          {!isAdmin && !hasSubscription && (
             <Button component={RouterLink} to="/subscribe" variant="contained" sx={{ mt: 2 }}>
               Оформить подписку
             </Button>

@@ -210,20 +210,17 @@ export default function Header() {
                     <Typography variant="caption" color="text.secondary">
                       {user.email}
                     </Typography>
-                    <Box sx={{ mt: 1 }}>
-                      <Chip
-                        size="small"
-                        icon={<WorkspacePremiumIcon />}
-                        color={isAdmin || hasSubscription ? 'success' : 'default'}
-                        label={
-                          isAdmin
-                            ? 'Полный доступ'
-                            : hasSubscription
-                              ? 'Подписка активна'
-                              : 'Без подписки'
-                        }
-                      />
-                    </Box>
+                    {/* администратору статус подписки не показываем — он к нему не относится */}
+                    {!isAdmin && (
+                      <Box sx={{ mt: 1 }}>
+                        <Chip
+                          size="small"
+                          icon={<WorkspacePremiumIcon />}
+                          color={hasSubscription ? 'success' : 'default'}
+                          label={hasSubscription ? 'Подписка активна' : 'Без подписки'}
+                        />
+                      </Box>
+                    )}
                   </Box>
                   <Divider sx={{ my: 1 }} />
                   <MenuItem

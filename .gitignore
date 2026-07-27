@@ -31,8 +31,10 @@ server/data
 server/uploads/*
 !server/uploads/hero-greek2.jpg
 !server/uploads/hero-athlete.mp4
-# Видео первого экрана — его запрашивает главная страница, без него там дыра
+# Видео первого экрана — его запрашивает главная страница, без него там дыра.
+# Рядом стоп-кадр: им заменяем видео на телефоне, чтобы не качать 11 МБ.
 !server/uploads/hero-style-scene-hd.mp4
+!server/uploads/hero-style-scene.png
 
 # Секреты
 .env

@@ -10,6 +10,8 @@ import {
   Container,
   Stack,
   Typography,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { useApp } from '../store/AppContext';
@@ -66,6 +68,14 @@ export default function HomePage() {
   const { db, logEvent } = useApp();
   const [line1, line2] = useLogoLines();
   const { hash } = useLocation();
+  const theme = useTheme();
+  /*
+   * Видео первого экрана весит 11 МБ и играет фоном под маской прозрачности.
+   * На телефоне это лишний трафик ради декорации, поэтому там ставим
+   * стоп-кадр. Проверяем ширину заранее: скрытый через CSS <video> всё
+   * равно скачался бы.
+   */
+  const wideScreen = useMediaQuery(theme.breakpoints.up('md'));
 
   useEffect(() => {
     logEvent({ type: 'page', path: '/' });
@@ -135,14 +145,18 @@ export default function HomePage() {
           Герои меньше за счёт узкой панели (38%), без scale.
         */}
         <Box
-          component="video"
+          {...(wideScreen
+            ? {
+                component: 'video' as const,
+                autoPlay: true,
+                muted: true,
+                loop: true,
+                playsInline: true,
+                preload: 'auto',
+                src: '/media/hero-style-scene-hd.mp4?v=5',
+              }
+            : { component: 'img' as const, src: '/media/hero-style-scene.png', alt: '' })}
           aria-hidden
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="auto"
-          src="/media/hero-style-scene-hd.mp4?v=5"
           sx={{
             position: 'absolute',
             // как ~3 шага назад: у правого края, шире к центру (~32%)
