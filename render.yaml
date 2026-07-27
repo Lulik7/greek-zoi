@@ -1,0 +1,27 @@
+# Описание сервиса для Render (Blueprint).
+# Можно не использовать и завести Web Service руками — значения те же.
+services:
+  - type: web
+    name: greek-zoi
+    runtime: node
+    plan: free
+    # npm ci ставит ровно то, что в package-lock.json
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/bootstrap
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # Render сгенерирует случайный ключ сам — руками вводить ничего не нужно.
+      # Важно, чтобы ключ жил в переменной: на бесплатном тарифе диск не
+      # сохраняется, и файловый ключ пересоздавался бы при каждом запуске,
+      # разлогинивая всех.
+      - key: JWT_SECRET
+        generateValue: true
+      # Почта не подключена, поэтому подтверждение адреса выключено —
+      # иначе демо упирается в «подтвердите почту» и подписку не посмотреть.
+      - key: REQUIRE_VERIFIED_EMAIL
+        value: "0"
+      # Адрес сайта: заполняется вручную после того, как Render выдаст домен.
+      - key: PUBLIC_URL
+        sync: false
