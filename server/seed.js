@@ -11,7 +11,7 @@ const DEMO = [
 
 export const LEVELS = [
   { id: 'a1', code: 'A1', title: 'Α1 — Начальный', description: 'Первые слова, алфавит, знакомство', order: 1 },
-  { id: 'a2', code: 'A2', title: 'Α2 — Базовый', description: 'Быт, покупки, простой диалог', order: 2 },
+  { id: 'a2', code: 'A2', title: 'Α2 — Базовый', description: 'Быт, покупки, простые фразы', order: 2 },
   { id: 'b1', code: 'B1', title: 'Β1 — Средний', description: 'Свободный разговор на бытовые темы', order: 3 },
   { id: 'b2', code: 'B2', title: 'Β2 — Выше среднего', description: 'Мнение, аргументы, тексты песен', order: 4 },
   { id: 'g1', code: 'Γ1', title: 'Γ1 — Продвинутый', description: 'Идиомы, разговорная речь, поэзия', order: 5 },
@@ -51,7 +51,7 @@ export const TRACKS = [
   {
     title: 'Στο σούπερ μάρκετ',
     titleRu: 'В супермаркете',
-    artist: 'Диалог • Ζωή & Νίκος',
+    artist: 'Ζωή & Νίκος',
     kind: 'dialogue',
     levelIds: ['a1', 'a2'],
     topicIds: ['shopping', 'food'],
@@ -69,7 +69,7 @@ export const TRACKS = [
   {
     title: 'Τι φοράς σήμερα;',
     titleRu: 'Что ты сегодня надеваешь?',
-    artist: 'Диалог • Ζωή & Μαρία',
+    artist: 'Ζωή & Μαρία',
     kind: 'dialogue',
     levelIds: ['a2'],
     topicIds: ['clothes', 'shopping'],
@@ -103,7 +103,7 @@ export const TRACKS = [
   {
     title: 'Στο εστιατόριο',
     titleRu: 'В ресторане',
-    artist: 'Диалог • Ζωή & σερβιτόρος',
+    artist: 'Ζωή & σερβιτόρος',
     kind: 'dialogue',
     levelIds: ['a2', 'b1'],
     topicIds: ['food'],
@@ -152,7 +152,7 @@ export const TRACKS = [
   {
     title: 'Συνέντευξη για δουλειά',
     titleRu: 'Собеседование на работу',
-    artist: 'Диалог • Ζωή & εργοδότης',
+    artist: 'Ζωή & εργοδότης',
     kind: 'dialogue',
     levelIds: ['b2', 'g1'],
     topicIds: ['work'],
@@ -185,7 +185,7 @@ export const TRACKS = [
   {
     title: 'Στην αγορά της Αθήνας',
     titleRu: 'На афинском рынке',
-    artist: 'Диалог • Ζωή & πωλητής',
+    artist: 'Ζωή & πωλητής',
     kind: 'dialogue',
     levelIds: ['b1'],
     topicIds: ['shopping', 'food'],
@@ -223,7 +223,7 @@ export const SETTINGS = {
       title: 'Месяц',
       priceEur: 9,
       periodDays: 30,
-      features: ['Все песни и диалоги', 'Тексты с переводом', 'Новые материалы каждую неделю'],
+      features: ['Все материалы школы', 'Тексты с переводом', 'Новые материалы каждую неделю'],
     },
     {
       id: 'half',

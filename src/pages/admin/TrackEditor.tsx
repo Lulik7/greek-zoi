@@ -120,9 +120,12 @@ export default function TrackEditor({ open, track, levels, topics, onClose, onSa
    * Массовая вставка текста: строки вида
    *   0:12 | Καλημέρα | Доброе утро
    * Время и перевод не обязательны.
+   *
+   * Разбор вынесен отдельно от записи в черновик: то же самое нужно
+   * при сохранении, если админ вставил текст и не нажал «Разобрать».
    */
-  const applyBulk = () => {
-    const lines: LyricLine[] = bulk
+  const parseBulk = (raw: string): LyricLine[] =>
+    raw
       .split('\n')
       .map((raw) => raw.trim())
       .filter(Boolean)
@@ -143,8 +146,21 @@ export default function TrackEditor({ open, track, levels, topics, onClose, onSa
         }
         return { time, el, ru };
       });
-    setDraft((d) => ({ ...d, lyrics: lines }));
+
+  const applyBulk = () => {
+    setDraft((d) => ({ ...d, lyrics: parseBulk(bulk) }));
+    setBulk('');
     setBulkOpen(false);
+  };
+
+  /**
+   * Сохранение. Если в окне вставки остался неразобранный текст, разбираем
+   * его сами: раньше такой текст молча пропадал — админ вставлял строки,
+   * жал «Сохранить», и материал уходил с нулём строк.
+   */
+  const handleSave = () => {
+    const pending = bulk.trim() ? parseBulk(bulk) : null;
+    onSave(pending && pending.length ? { ...draft, lyrics: pending } : draft);
   };
 
   const pickFile = async (file?: File | null) => {
@@ -187,22 +203,11 @@ export default function TrackEditor({ open, track, levels, topics, onClose, onSa
 
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
             <TextField
-              label="Исполнитель / участники диалога"
+              label="Исполнитель"
               value={draft.artist}
               onChange={(e) => set('artist', e.target.value)}
               fullWidth
             />
-            <FormControl sx={{ minWidth: 180 }}>
-              <InputLabel>Тип</InputLabel>
-              <Select
-                label="Тип"
-                value={draft.kind}
-                onChange={(e) => set('kind', e.target.value as Track['kind'])}
-              >
-                <MenuItem value="song">Песня</MenuItem>
-                <MenuItem value="dialogue">Диалог</MenuItem>
-              </Select>
-            </FormControl>
           </Stack>
 
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
@@ -387,11 +392,19 @@ export default function TrackEditor({ open, track, levels, topics, onClose, onSa
                 fullWidth
                 multiline
                 minRows={5}
+                autoFocus
+                placeholder={'Вставьте сюда текст материала\nпо одной строке'}
                 sx={{ mt: 1, bgcolor: 'background.paper' }}
               />
               <Button variant="contained" size="small" sx={{ mt: 1 }} onClick={applyBulk}>
                 Разобрать и заменить текст
               </Button>
+              {bulk.trim() && (
+                <Typography variant="caption" sx={{ display: 'block', mt: 1, color: 'warning.dark' }}>
+                  Текст ещё не разобран. Нажмите кнопку выше — или просто сохраните материал,
+                  разберём сами.
+                </Typography>
+              )}
             </Box>
           )}
 
@@ -444,7 +457,7 @@ export default function TrackEditor({ open, track, levels, topics, onClose, onSa
       </DialogContent>
       <DialogActions sx={{ px: 3, py: 2 }}>
         <Button onClick={onClose}>Отмена</Button>
-        <Button variant="contained" disabled={!valid} onClick={() => onSave(draft)}>
+        <Button variant="contained" disabled={!valid} onClick={handleSave}>
           Сохранить
         </Button>
       </DialogActions>

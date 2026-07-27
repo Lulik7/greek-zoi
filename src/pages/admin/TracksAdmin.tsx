@@ -129,7 +129,7 @@ export default function TracksAdmin() {
               <CardContent>
                 <Typography sx={{ fontWeight: 600 }}>{t.title}</Typography>
                 <Typography variant="caption" color="text.secondary">
-                  {t.titleRu} · {t.kind === 'song' ? 'песня' : 'диалог'} · строк текста: {t.lyrics.length}
+                  {t.titleRu} · строк текста: {t.lyrics.length}
                 </Typography>
                 <Stack direction="row" spacing={0.5} useFlexGap sx={{ mt: 1, flexWrap: 'wrap' }}>
                   {levelChips(t)}

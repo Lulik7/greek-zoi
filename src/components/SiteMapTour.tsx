@@ -21,7 +21,7 @@ const STEPS: { title: string; line: string; target: string | null; side: Side }[
   },
   {
     title: 'Поиск',
-    line: 'Здесь можно найти песни и диалоги',
+    line: 'Здесь можно найти материалы школы',
     target: 'home-search',
     side: 'center',
   },

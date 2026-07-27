@@ -142,11 +142,6 @@ export default function TrackCard({ track, levels, topics, onLocked, defaultOpen
               {topicChips.map((t) => (
                 <Chip key={t.id} size="small" variant="outlined" label={`${t.emoji} ${t.title}`} />
               ))}
-              <Chip
-                size="small"
-                variant="outlined"
-                label={track.kind === 'song' ? 'Песня' : 'Диалог'}
-              />
             </Stack>
           </Box>
           </Box>

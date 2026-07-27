@@ -7,8 +7,6 @@ import {
   Divider,
   Paper,
   Stack,
-  ToggleButton,
-  ToggleButtonGroup,
   Typography,
 } from '@mui/material';
 import { useApp } from '../store/AppContext';
@@ -23,7 +21,6 @@ export default function CatalogPage() {
   const { db, logEvent } = useApp();
   const [params, setParams] = useSearchParams();
   const [locked, setLocked] = useState<Track | null>(null);
-  const [kind, setKind] = useState<'all' | 'song' | 'dialogue'>('all');
 
   const q = params.get('q') ?? '';
   const levelParam = params.get('level');
@@ -54,8 +51,8 @@ export default function CatalogPage() {
   const results = useMemo(() => {
     if (!db) return [];
     if (trackParam) return db.tracks.filter((t) => t.id === trackParam);
-    return filterTracks(db.tracks, { levelIds, topicIds, text: intent?.text, kind });
-  }, [db, levelIds, topicIds, intent, kind, trackParam]);
+    return filterTracks(db.tracks, { levelIds, topicIds, text: intent?.text });
+  }, [db, levelIds, topicIds, intent, trackParam]);
 
   if (!db) return null;
 
@@ -189,16 +186,6 @@ export default function CatalogPage() {
             </Typography>
           </Typography>
 
-          <ToggleButtonGroup
-            size="small"
-            exclusive
-            value={kind}
-            onChange={(_, v) => v && setKind(v)}
-          >
-            <ToggleButton value="all">Все</ToggleButton>
-            <ToggleButton value="song">Песни</ToggleButton>
-            <ToggleButton value="dialogue">Диалоги</ToggleButton>
-          </ToggleButtonGroup>
         </Stack>
 
         {results.length === 0 && (

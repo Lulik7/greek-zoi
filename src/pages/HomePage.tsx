@@ -270,7 +270,7 @@ export default function HomePage() {
                 textShadow: '0 1px 8px rgba(33,25,95,.25)',
               }}
             >
-              Песни и диалоги с текстом — слушайте и говорите по-гречески
+              Песни с текстом — слушайте и говорите по-гречески
             </Typography>
 
             <Box
@@ -383,7 +383,7 @@ export default function HomePage() {
           </Box>
 
           <Box id="home-levels" sx={{ scrollMarginTop: 88 }}>
-            <SectionTitle hint="Выберите свой уровень — откроются подходящие песни и диалоги.">
+            <SectionTitle hint="Выберите свой уровень — откроются подходящие материалы.">
               Уровни
             </SectionTitle>
             <Box
@@ -523,7 +523,7 @@ export default function HomePage() {
             }}
           >
             <Typography sx={{ mb: 3, fontSize: 16.5, color: 'text.secondary' }}>
-              Полный список песен и диалогов школы — с уровнями, темами и пометкой, что открыто.
+              Полный список материалов школы — с уровнями, темами и пометкой, что открыто.
             </Typography>
             <Button
               component={RouterLink}

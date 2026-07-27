@@ -59,7 +59,7 @@ export default function AllTracksPage() {
         Полный список материалов
       </Typography>
       <Typography color="text.secondary" sx={{ mb: 3 }}>
-        Все песни и диалоги школы — {rows.length} шт. Нажмите, чтобы открыть материал.
+        Все материалы школы — {rows.length} шт. Нажмите, чтобы открыть материал.
       </Typography>
 
       <TextField
