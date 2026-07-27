@@ -169,10 +169,7 @@ function pickRandom<T>(arr: readonly T[], avoidIndex?: number): { item: T; index
   return { item: arr[i], index: i };
 }
 
-/**
- * Внизу страницы: облако с героем мифа + рандомный факт/анекдот.
- * 10 с или клик. Не показывается на /subscribe.
- */
+
 export default function GreekMythCloud() {
   const { pathname } = useLocation();
   const excluded = EXCLUDE.has(pathname) || pathname.startsWith('/admin');

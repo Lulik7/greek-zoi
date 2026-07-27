@@ -347,13 +347,24 @@ body {
 }
 
 /*
- * На телефоне оливки висят поверх заголовка и лезут на буквы: места по
- * ширине мало, а разлетаются они на фиксированное число пикселей.
- * Прячем именно их — остальной декор по краям не мешает.
+ * Телефон: на узком экране декор налезает на название сайта, а само
+ * название ещё и качается — читать неудобно. Поэтому здесь заголовок
+ * стоит неподвижно, а оливки, лимоны и венок рядом с ним убраны.
+ * Остальной декор по краям не мешает и остаётся.
  */
 @media (max-width: 599.98px) {
   .decor-item[src*='olive'],
-  .site-decor-item[src*='olive'] {
+  .decor-item[src*='lemon'],
+  .decor-item[src*='laurel'],
+  .site-decor-item[src*='olive'],
+  .site-decor-item[src*='lemon'],
+  .site-decor-item[src*='laurel'] {
     display: none !important;
+  }
+
+  .hero-title-fly,
+  .hero-title-fly-delay {
+    animation: none !important;
+    transform: none !important;
   }
 }

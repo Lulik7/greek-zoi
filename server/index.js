@@ -426,6 +426,18 @@ if (existsSync(DIST)) {
 }
 
 app.use((err, _req, res, _next) => {
+  /**
+   * Кривой ввод — вина клиента, а не сервера. Отдавать на него 500 плохо:
+   * в логах это выглядит как поломка, а любой сканер может засыпать сервер
+   * «ошибками». Разбираем то, что кидает разбор тела запроса.
+   */
+  if (err?.type === 'entity.parse.failed' || (err instanceof SyntaxError && 'body' in err)) {
+    return res.status(400).json({ error: 'Некорректный JSON в запросе' });
+  }
+  if (err?.type === 'entity.too.large') {
+    return res.status(413).json({ error: 'Слишком большой запрос' });
+  }
+
   console.error('[api]', err);
   res.status(500).json({ error: 'Внутренняя ошибка сервера' });
 });
