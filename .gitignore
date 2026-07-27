@@ -31,6 +31,8 @@ server/data
 server/uploads/*
 !server/uploads/hero-greek2.jpg
 !server/uploads/hero-athlete.mp4
+# Видео первого экрана — его запрашивает главная страница, без него там дыра
+!server/uploads/hero-style-scene-hd.mp4
 
 # Секреты
 .env
