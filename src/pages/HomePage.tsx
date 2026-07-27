@@ -21,7 +21,6 @@ import FloatingDecor from '../components/FloatingDecor';
 import SiteMapTour from '../components/SiteMapTour';
 import AccessibilityPanel from '../components/AccessibilityPanel';
 import MusicQuotesBand from '../components/MusicQuotesBand';
-import TeacherPhoto from '../components/TeacherPhoto';
 import { useLogoLines } from '../lib/title';
 import {
   cartoonTitle,
@@ -378,8 +377,6 @@ export default function HomePage() {
             id="home-search"
             sx={{ mt: { xs: -2.5, md: -5 }, position: 'relative', zIndex: 3, scrollMarginTop: 88 }}
           >
-            {/* фото преподавателя в той же рамке, что у инструментов */}
-            <TeacherPhoto />
             <SearchBar />
           </Box>
 

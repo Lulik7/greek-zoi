@@ -220,8 +220,20 @@ export default function MusicQuotesBand() {
               gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
             }}
           >
-            {ARTICLE.map((p) => (
-              <Box key={p.head}>
+            {ARTICLE.map((p, i) => (
+              <Box
+                key={p.head}
+                sx={{
+                  /*
+                   * Разделов нечётное число, поэтому последний оставался один
+                   * в левой колонке с пустотой справа. Растягиваем его на обе.
+                   */
+                  gridColumn:
+                    ARTICLE.length % 2 === 1 && i === ARTICLE.length - 1
+                      ? { md: '1 / -1' }
+                      : undefined,
+                }}
+              >
                 <Typography
                   sx={{
                     fontWeight: 900,

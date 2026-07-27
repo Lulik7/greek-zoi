@@ -16,6 +16,7 @@ export default function FunFrame({
   delay = '0s',
   width,
   aspect,
+  onLight = false,
 }: {
   children: React.ReactNode;
   caption?: string;
@@ -26,6 +27,11 @@ export default function FunFrame({
   width?: { xs: number; sm?: number; md: number };
   /** пропорции окна: по умолчанию квадрат */
   aspect?: string;
+  /**
+   * Рамка стоит на светлом фоне. Подпись по умолчанию жёлтая с тёмной
+   * тенью — это читается на фиолетовой полосе, но не на бежевой странице.
+   */
+  onLight?: boolean;
 }) {
   const w = width ?? { xs: 140, sm: 165, md: 200 };
   return (
@@ -80,11 +86,12 @@ export default function FunFrame({
           sx={{
             mt: 1.25,
             textAlign: 'center',
-            fontWeight: 900,
+            fontWeight: onLight ? 700 : 900,
             fontSize: { xs: 14.5, md: 16.5 },
-            color: YELLOW,
-            textShadow: `0 2px 0 ${INK}`,
-            lineHeight: 1.25,
+            color: onLight ? INK : YELLOW,
+            textShadow: onLight ? 'none' : `0 2px 0 ${INK}`,
+            opacity: onLight ? 0.85 : 1,
+            lineHeight: 1.35,
           }}
         >
           {caption}

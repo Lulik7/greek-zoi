@@ -76,6 +76,7 @@ export default function CatalogPage() {
         <Box sx={{ display: 'flex', justifyContent: 'center' }}>
           <FunFrame
             caption="Древнегреческая нотация: знаки для голоса и для инструмента"
+            onLight
             tilt={-2}
             aspect="756 / 317"
             width={{ xs: 320, sm: 520, md: 700 }}
