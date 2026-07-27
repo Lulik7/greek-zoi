@@ -352,7 +352,7 @@ body {
  * стоит неподвижно, а оливки, лимоны и венок рядом с ним убраны.
  * Остальной декор по краям не мешает и остаётся.
  */
-@media (max-width: 599.98px) {
+@media (max-width: 1199.98px) {
   .decor-item[src*='olive'],
   .decor-item[src*='lemon'],
   .decor-item[src*='laurel'],

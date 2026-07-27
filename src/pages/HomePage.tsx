@@ -276,6 +276,8 @@ export default function HomePage() {
             <Box
               component={RouterLink}
               to="/catalog"
+              // якорь для облака тура — оно садится на эту надпись
+              id="home-school-badge"
               sx={{
                 mt: { xs: 3, md: 3.5 },
                 display: 'inline-block',

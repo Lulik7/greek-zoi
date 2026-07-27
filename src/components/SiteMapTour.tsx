@@ -57,11 +57,21 @@ function pageDock(stepIndex: number): Pt {
   const s = STEPS[stepIndex];
   const x = sideX(s.side);
   if (!s.target) {
-    // 0 — чуть выше и левее, чтобы не закрывать надпись; 1 — ниже слева
+    // 0 — садится на надпись «Онлайн-школа…»; 1 — ниже слева
     if (stepIndex === 0) {
+      const badge = document.getElementById('home-school-badge');
+      if (badge) {
+        const r = badge.getBoundingClientRect();
+        return {
+          x: Math.round(r.left + r.width / 2),
+          // низ облака чуть ниже надписи — облако ложится прямо на неё
+          y: r.bottom + window.scrollY + 8,
+        };
+      }
+      // запасной вариант, если надписи на странице нет
       return {
-        x: Math.round(window.innerWidth * 0.28),
-        y: window.scrollY + Math.max(72, window.innerHeight * 0.08),
+        x: Math.round(window.innerWidth * 0.3),
+        y: window.scrollY + window.innerHeight * 0.5,
       };
     }
     return { x, y: window.scrollY + window.innerHeight * 0.26 };
