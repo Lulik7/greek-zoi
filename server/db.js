@@ -1,19 +1,22 @@
 /**
  * База данных — SQLite (встроенный в Node модуль `node:sqlite`, без нативных сборок).
- * Файл базы: server/data/school.db. Достаточно скопировать его, чтобы сделать бэкап.
+ * Файл базы: <STORAGE_DIR>/data/school.db, по умолчанию server/data/school.db.
+ * Достаточно скопировать его, чтобы сделать бэкап.
  *
  * Здесь же — весь доступ к данным. Роуты в index.js работают только через эти функции.
  */
 import { DatabaseSync } from 'node:sqlite';
 import { createHash, randomBytes } from 'node:crypto';
 import { mkdirSync } from 'node:fs';
-import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { join } from 'node:path';
 import bcrypt from 'bcryptjs';
+import { paths } from './config.js';
 import { LEVELS, TOPICS, TRACKS, SETTINGS, USERS } from './seed.js';
 
-const here = dirname(fileURLToPath(import.meta.url));
-const DATA_DIR = join(here, 'data');
+// Путь берём из config: в облаке он указывает на подключённый диск,
+// иначе база не переживёт перезапуск. Папку config уже создал, но
+// mkdirSync с recursive безвреден и страхует от неожиданного порядка импортов.
+const DATA_DIR = paths.dataDir;
 mkdirSync(DATA_DIR, { recursive: true });
 
 export const db = new DatabaseSync(join(DATA_DIR, 'school.db'));
