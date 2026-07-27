@@ -1,4 +1,5 @@
 import { Box, Card, CardContent, Chip, Typography } from '@mui/material';
+import { toEmbedUrl } from '../lib/video';
 
 interface Props {
   title: string;
@@ -10,6 +11,9 @@ interface Props {
 /** Поддерживает YouTube/Vimeo (iframe) и прямые mp4-ссылки. */
 export default function VideoBlock({ title, description, url, badge }: Props) {
   const isFile = /\.(mp4|webm|ogg)(\?|$)/i.test(url);
+  // обычную ссылку «watch?v=…» переводим в адрес для рамки: страницу
+  // просмотра YouTube встраивать не разрешает
+  const embedUrl = isFile ? url : toEmbedUrl(url);
 
   return (
     <Card>
@@ -25,7 +29,7 @@ export default function VideoBlock({ title, description, url, badge }: Props) {
           ) : (
             <Box
               component="iframe"
-              src={url}
+              src={embedUrl}
               title={title}
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; picture-in-picture"
               allowFullScreen

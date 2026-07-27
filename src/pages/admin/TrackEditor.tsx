@@ -32,6 +32,7 @@ import UploadFileIcon from '@mui/icons-material/UploadFile';
 import ContentPasteIcon from '@mui/icons-material/ContentPaste';
 import type { Level, LyricLine, Topic, Track } from '../../types';
 import { useApp } from '../../store/AppContext';
+import { isVideoPageUrl } from '../../lib/video';
 
 interface Props {
   open: boolean;
@@ -302,7 +303,12 @@ export default function TrackEditor({ open, track, levels, topics, onClose, onSa
                 }}
                 fullWidth
                 required
-                helperText="Загрузите файл кнопкой справа или вставьте ссылку из внешнего хранилища"
+                error={isVideoPageUrl(draft.audioUrl)}
+                helperText={
+                  isVideoPageUrl(draft.audioUrl)
+                    ? 'Это ссылка на страницу видео, а не на звуковой файл — плеер её не откроет. Загрузите mp3 кнопкой справа.'
+                    : 'Загрузите файл кнопкой справа или вставьте ссылку из внешнего хранилища'
+                }
               />
               <Button
                 variant="outlined"
