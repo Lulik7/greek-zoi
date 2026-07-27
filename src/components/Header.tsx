@@ -115,12 +115,22 @@ export default function Header() {
                       fontFamily: GREEK_FONT,
                       fontStyle: 'italic',
                       fontWeight: 700,
-                      fontSize: { xs: 15.5, sm: 19, md: 21 },
+                      fontSize: { sm: 17, md: 19, lg: 21 },
                       lineHeight: 1.25,
                       color: 'secondary.main',
                       minWidth: 0,
+                      /*
+                       * На планшете строка не помещается и обрывалась многоточием.
+                       * Разрешаем ей занять две строки; на широком экране —
+                       * по-прежнему одна.
+                       */
+                      display: { sm: '-webkit-box', lg: 'block' },
+                      WebkitBoxOrient: 'vertical',
+                      WebkitLineClamp: { sm: 2, lg: 'unset' },
+                      overflow: 'hidden',
+                      whiteSpace: { sm: 'normal', lg: 'nowrap' },
+                      textOverflow: 'ellipsis',
                     }}
-                    noWrap
                   >
                     {s?.heroQuoteEl}
                   </Typography>
@@ -136,8 +146,18 @@ export default function Header() {
                 <Typography
                   variant="caption"
                   component="div"
-                  sx={{ color: 'rgba(255,255,255,.85)', letterSpacing: '0.02em' }}
-                  noWrap
+                  sx={{
+                    color: 'rgba(255,255,255,.85)',
+                    letterSpacing: '0.02em',
+                    lineHeight: 1.3,
+                    // то же правило, что и для греческой строки выше
+                    display: { sm: '-webkit-box', lg: 'block' },
+                    WebkitBoxOrient: 'vertical',
+                    WebkitLineClamp: { sm: 2, lg: 'unset' },
+                    overflow: 'hidden',
+                    whiteSpace: { sm: 'normal', lg: 'nowrap' },
+                    textOverflow: 'ellipsis',
+                  }}
                 >
                   {s?.heroQuoteRu}
                   {s?.heroQuoteSource ? ` · ${s.heroQuoteSource}` : ''}
