@@ -364,7 +364,7 @@ export default function GreekMythCloud() {
             sx={{
               m: 0,
               fontWeight: 800,
-              fontSize: { xs: 13.5, sm: 14.5 },
+              fontSize: { xs: 15, sm: 16.5 },
               lineHeight: 1.4,
               color: INK,
               wordBreak: 'break-word',

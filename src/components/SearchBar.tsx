@@ -93,7 +93,7 @@ export default function SearchBar({ initial = '' }: { initial?: string }) {
            * переноситься раньше, до края.
            */
           px: { xs: 2.5, sm: 0 },
-          fontSize: { xs: 13.5, sm: 14 },
+          fontSize: { xs: 15, sm: 16 },
           lineHeight: 1.45,
           overflowWrap: 'anywhere',
         }}

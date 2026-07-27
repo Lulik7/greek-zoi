@@ -21,6 +21,7 @@ import FloatingDecor from '../components/FloatingDecor';
 import SiteMapTour from '../components/SiteMapTour';
 import AccessibilityPanel from '../components/AccessibilityPanel';
 import MusicQuotesBand from '../components/MusicQuotesBand';
+import TeacherPhoto from '../components/TeacherPhoto';
 import { useLogoLines } from '../lib/title';
 import {
   cartoonTitle,
@@ -56,7 +57,17 @@ function SectionTitle({ children, hint }: { children: string; hint?: string }) {
         {children}
       </Typography>
       {hint && (
-        <Typography variant="body2" sx={{ mt: 0.5, color: 'text.secondary' }}>
+        // подзаголовок раздела: крупнее и контрастнее приглушённого серого
+        <Typography
+          sx={{
+            mt: 0.6,
+            color: INK,
+            opacity: 0.82,
+            fontWeight: 600,
+            fontSize: { xs: 15, md: 17 },
+            lineHeight: 1.45,
+          }}
+        >
           {hint}
         </Typography>
       )}
@@ -367,6 +378,8 @@ export default function HomePage() {
             id="home-search"
             sx={{ mt: { xs: -2.5, md: -5 }, position: 'relative', zIndex: 3, scrollMarginTop: 88 }}
           >
+            {/* фото преподавателя в той же рамке, что у инструментов */}
+            <TeacherPhoto />
             <SearchBar />
           </Box>
 

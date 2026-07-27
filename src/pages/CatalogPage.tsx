@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import {
   Alert,
+  Box,
   Chip,
   Container,
   Divider,
@@ -11,6 +12,7 @@ import {
 } from '@mui/material';
 import { useApp } from '../store/AppContext';
 import SearchBar from '../components/SearchBar';
+import FunFrame from '../components/FunFrame';
 import TrackCard from '../components/TrackCard';
 import LockedDialog from '../components/LockedDialog';
 import { filterTracks, interpretQuery } from '../lib/search';
@@ -70,6 +72,31 @@ export default function CatalogPage() {
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
       <Stack spacing={3}>
+        {/* древнегреческая нотация — картинка со свободной лицензией с Викисклада */}
+        <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+          <FunFrame
+            caption="Древнегреческая нотация: знаки для голоса и для инструмента"
+            tilt={-2}
+            aspect="756 / 317"
+            width={{ xs: 320, sm: 520, md: 700 }}
+          >
+            <Box
+              component="img"
+              src="/decor/greek-notation.png"
+              alt="Таблица древнегреческой музыкальной нотации"
+              loading="lazy"
+              sx={{
+                position: 'absolute',
+                inset: 0,
+                width: '100%',
+                height: '100%',
+                objectFit: 'contain',
+                display: 'block',
+              }}
+            />
+          </FunFrame>
+        </Box>
+
         <SearchBar initial={q} />
 
         {/* Уровни и темы — с заливкой, чтобы выделялись на сиреневом фоне */}
