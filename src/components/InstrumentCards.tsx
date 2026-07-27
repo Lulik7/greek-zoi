@@ -22,9 +22,10 @@ const ITEMS = [
     delay: '0.5s',
   },
   {
-    key: 'santouri',
-    src: '/decor/instr-santouri.jpg',
-    caption: 'Σαντούρι · сантури',
+    key: 'askomandoura',
+    src: '/decor/instr-askomandoura.jpg',
+    // на фото критская волынка из козьей шкуры, а не сантури — подпись по факту
+    caption: 'Ασκομαντούρα · волынка',
     tilt: 6,
     delay: '1s',
   },
