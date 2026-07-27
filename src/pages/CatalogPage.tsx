@@ -93,7 +93,17 @@ export default function CatalogPage() {
             >
               Уровень
             </Typography>
-            <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: 'wrap' }}>
+            {/*
+              Уровней ровно шесть и подписи короткие — на телефоне держим их
+              в одну строку, иначе последний (Γ2) срывается на вторую.
+              Перенос разрешаем только начиная с планшета.
+            */}
+            <Stack
+              direction="row"
+              spacing={{ xs: 0.5, sm: 1 }}
+              useFlexGap
+              sx={{ flexWrap: { xs: 'nowrap', sm: 'wrap' } }}
+            >
               {db.levels.map((l) => {
                 const on = levelIds.includes(l.id);
                 return (
@@ -104,6 +114,9 @@ export default function CatalogPage() {
                     onClick={() => toggleParam('level', l.id)}
                     sx={{
                       fontWeight: 800,
+                      flex: { xs: '1 1 0', sm: '0 0 auto' },
+                      minWidth: 0,
+                      '& .MuiChip-label': { px: { xs: 0.75, sm: 1.5 } },
                       bgcolor: on ? HERO_VIOLET : 'rgba(124,122,207,0.12)',
                       color: on ? '#fff' : INK,
                       border: on ? 'none' : '1px solid rgba(124,122,207,0.35)',

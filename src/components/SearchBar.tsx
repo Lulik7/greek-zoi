@@ -56,7 +56,7 @@ export default function SearchBar({ initial = '' }: { initial?: string }) {
           renderInput={(params) => (
             <TextField
               {...params}
-              placeholder='Например: «уровень А1», «покупки», «θάλασσα»'
+              placeholder='Например: «А1», «покупки», «θάλασσα»'
               onKeyDown={(e) => {
                 if (e.key === 'Enter') go(value);
               }}
@@ -81,7 +81,19 @@ export default function SearchBar({ initial = '' }: { initial?: string }) {
           Найти
         </Button>
       </Box>
-      <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+      <Typography
+        variant="caption"
+        color="text.secondary"
+        sx={{
+          mt: 1,
+          display: 'block',
+          // на узком экране строка длинная — уменьшаем и переносим по словам,
+          // иначе хвост «на русском…» вылезал за край карточки
+          fontSize: { xs: 11, sm: 12 },
+          lineHeight: 1.4,
+          overflowWrap: 'anywhere',
+        }}
+      >
         Ищем по уровню, теме, названию, исполнителю и по тексту песни — на русском и на греческом.
       </Typography>
     </Paper>
