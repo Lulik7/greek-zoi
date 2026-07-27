@@ -28,7 +28,7 @@ import { normalize } from '../lib/search';
 import type { Track } from '../types';
 
 export default function AllTracksPage() {
-  const { db, hasSubscription, logEvent } = useApp();
+  const { db, hasAccess, logEvent } = useApp();
   const nav = useNavigate();
   const theme = useTheme();
   const compact = useMediaQuery(theme.breakpoints.down('md'));
@@ -49,7 +49,7 @@ export default function AllTracksPage() {
 
   if (!db) return null;
 
-  const isOpen = (t: Track) => (t.locked === undefined ? t.free || hasSubscription : !t.locked);
+  const isOpen = (t: Track) => (t.locked === undefined ? t.free || hasAccess : !t.locked);
   const levelsOf = (t: Track) => db.levels.filter((l) => t.levelIds.includes(l.id));
   const topicsOf = (t: Track) => db.topics.filter((tp) => t.topicIds.includes(tp.id));
 

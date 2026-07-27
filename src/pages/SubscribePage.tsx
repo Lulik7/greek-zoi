@@ -23,7 +23,7 @@ import AuthDialog from '../components/AuthDialog';
 import PrometheusFarewell from '../components/PrometheusFarewell';
 
 export default function SubscribePage() {
-  const { db, user, hasSubscription, checkout, resendVerification, logEvent } = useApp();
+  const { db, user, isAdmin, hasSubscription, checkout, resendVerification, logEvent } = useApp();
   const nav = useNavigate();
   const [params, setParams] = useSearchParams();
   const [authOpen, setAuthOpen] = useState(false);
@@ -89,7 +89,13 @@ export default function SubscribePage() {
           Оплата отменена — с карты ничего не списано.
         </Alert>
       )}
-      {hasSubscription && (
+      {/* администратор ведёт каталог — подписка ему не нужна */}
+      {isAdmin && (
+        <Alert severity="info" sx={{ mb: 3 }}>
+          Вы вошли как администратор — все материалы открыты без подписки.
+        </Alert>
+      )}
+      {hasSubscription && !isAdmin && (
         <Alert severity="success" sx={{ mb: 3 }}>
           Подписка активна до{' '}
           {user?.subscription.until
@@ -170,9 +176,9 @@ export default function SubscribePage() {
                 variant={p.highlighted ? 'contained' : 'outlined'}
                 sx={{ mt: 2 }}
                 onClick={() => buy(p.id)}
-                disabled={hasSubscription || busy === p.id}
+                disabled={hasSubscription || isAdmin || busy === p.id}
               >
-                {hasSubscription ? 'Уже активна' : busy === p.id ? 'Открываем оплату…' : 'Оформить'}
+                {isAdmin ? 'Не требуется' : hasSubscription ? 'Уже активна' : busy === p.id ? 'Открываем оплату…' : 'Оформить'}
               </Button>
             </CardContent>
           </Card>

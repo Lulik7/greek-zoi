@@ -17,7 +17,14 @@ interface AppContextValue {
   connectionError: string;
   user: User | null;
   isAdmin: boolean;
+  /** Настоящая подписка — для отображения статуса в кабинете и шапке */
   hasSubscription: boolean;
+  /**
+   * Открыт ли платный материал. У администратора открыт всегда: он ведёт
+   * каталог, и требовать с него подписку бессмысленно. Сервер считает так же
+   * (см. hasAccess в server/index.js).
+   */
+  hasAccess: boolean;
   refresh: () => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
   /** Возвращает ссылку подтверждения, если письма не настроены (дев-режим) */
@@ -80,14 +87,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const value = useMemo<AppContextValue>(() => {
     const sub = user?.subscription;
     const active = !!sub?.active && (!sub.until || new Date(sub.until).getTime() > Date.now());
+    const admin = user?.role === 'admin';
 
     return {
       db,
       loading,
       connectionError,
       user,
-      isAdmin: user?.role === 'admin',
+      isAdmin: admin,
       hasSubscription: active,
+      hasAccess: active || admin,
       refresh,
       login: wrap(api.login),
       register: async (email, password, name) => {

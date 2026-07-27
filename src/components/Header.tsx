@@ -214,8 +214,14 @@ export default function Header() {
                       <Chip
                         size="small"
                         icon={<WorkspacePremiumIcon />}
-                        color={hasSubscription ? 'success' : 'default'}
-                        label={hasSubscription ? 'Подписка активна' : 'Без подписки'}
+                        color={isAdmin || hasSubscription ? 'success' : 'default'}
+                        label={
+                          isAdmin
+                            ? 'Полный доступ'
+                            : hasSubscription
+                              ? 'Подписка активна'
+                              : 'Без подписки'
+                        }
                       />
                     </Box>
                   </Box>

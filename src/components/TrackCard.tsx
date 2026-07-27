@@ -32,14 +32,14 @@ interface Props {
 }
 
 export default function TrackCard({ track, levels, topics, onLocked, defaultOpen }: Props) {
-  const { hasSubscription, logEvent } = useApp();
+  const { hasSubscription, hasAccess, logEvent } = useApp();
   const audioRef = useRef<HTMLAudioElement>(null);
   const [open, setOpen] = useState(!!defaultOpen);
   const [showText, setShowText] = useState(!!defaultOpen);
   const [time, setTime] = useState(0);
 
   // сервер сам решает, что показывать: у закрытых материалов нет ни аудио, ни текста
-  const unlocked = track.locked === undefined ? track.free || hasSubscription : !track.locked;
+  const unlocked = track.locked === undefined ? track.free || hasAccess : !track.locked;
 
   const levelChips = useMemo(
     () => levels.filter((l) => track.levelIds.includes(l.id)),
