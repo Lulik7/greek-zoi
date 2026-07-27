@@ -268,7 +268,8 @@ function seedPassword(envName, devDefault, label) {
 export const USERS = [
   {
     id: 'u-admin',
-    email: 'admin@zoi.gr',
+    // почта администратора задаётся переменной ADMIN_EMAIL
+    email: process.env.ADMIN_EMAIL || 'admin@zoi.gr',
     name: 'Зоя Павловская',
     password: seedPassword('ADMIN_PASSWORD', 'admin123', 'администратор admin@zoi.gr'),
     role: 'admin',

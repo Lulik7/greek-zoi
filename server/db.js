@@ -501,6 +501,22 @@ function migrate() {
   // Из поля «исполнитель» убираем приставку «Диалог • » — понятие типа
   // материала из проекта убрано, а в старых записях приставка осталась.
   db.prepare("UPDATE tracks SET artist = TRIM(REPLACE(artist, 'Диалог • ', '')) WHERE artist LIKE 'Диалог • %'").run();
+
+  /*
+   * Почта администратора могла смениться через ADMIN_EMAIL. В базе, которая
+   * пережила перезапуск, учётка осталась со старым адресом — переносим её.
+   * Пароль не трогаем: если его меняли через админку, менять его молча нельзя.
+   */
+  const wanted = (process.env.ADMIN_EMAIL || '').trim();
+  if (wanted) {
+    const taken = db.prepare('SELECT id FROM users WHERE email = ?').get(wanted);
+    if (!taken) {
+      const changed = db
+        .prepare("UPDATE users SET email = ? WHERE role = 'admin' AND email <> ?")
+        .run(wanted, wanted);
+      if (changed.changes) console.log(`[db] почта администратора изменена на ${wanted}`);
+    }
+  }
 }
 
 seedIfEmpty();
