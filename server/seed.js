@@ -1,4 +1,5 @@
 // Начальное наполнение базы. Применяется один раз — при создании пустой базы.
+import { randomBytes } from 'node:crypto';
 
 const DEMO = [
   'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
@@ -242,12 +243,34 @@ export const SETTINGS = {
   ],
 };
 
+/**
+ * Пароли учётных записей, которые создаются при первом запуске.
+ *
+ * В коде их держать нельзя: репозиторий открытый, и любой прочитавший
+ * получил бы доступ к админке. Поэтому в продакшене пароль берётся из
+ * переменной окружения, а если её не задали — генерируется случайный и
+ * один раз печатается в лог сервера. На своей машине остаётся простой,
+ * чтобы не мешать разработке.
+ */
+function seedPassword(envName, devDefault, label) {
+  const fromEnv = process.env[envName];
+  if (fromEnv) return fromEnv;
+  if (process.env.NODE_ENV !== 'production') return devDefault;
+
+  const generated = randomBytes(12).toString('base64url');
+  console.log(
+    `[seed] ${label}: пароль не задан в ${envName}, сгенерирован — ${generated}\n` +
+      '[seed] запишите его и смените пароль через админку.',
+  );
+  return generated;
+}
+
 export const USERS = [
   {
     id: 'u-admin',
     email: 'admin@zoi.gr',
     name: 'Зоя Павловская',
-    password: 'admin123',
+    password: seedPassword('ADMIN_PASSWORD', 'admin123', 'администратор admin@zoi.gr'),
     role: 'admin',
     subscription: { active: true, planId: 'year', until: '2030-01-01T00:00:00.000Z' },
   },
@@ -255,7 +278,7 @@ export const USERS = [
     id: 'u-demo',
     email: 'student@mail.ru',
     name: 'Ученик Демо',
-    password: 'demo123',
+    password: seedPassword('DEMO_PASSWORD', 'demo123', 'демо-ученик student@mail.ru'),
     role: 'student',
     subscription: { active: false, planId: null, until: null },
   },
