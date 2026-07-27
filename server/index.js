@@ -14,13 +14,14 @@ import { createServer as createHttpsServer } from 'node:https';
 import { existsSync, mkdirSync, readFileSync } from 'node:fs';
 import { dirname, extname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { config, isProduction } from './config.js';
+import { config, isProduction, paths } from './config.js';
 import * as store from './db.js';
 import { sendPasswordReset, sendVerification } from './mailer.js';
 import { createCheckoutSession, fulfillCheckout, parseWebhook, stripeEnabled } from './payments.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
-const UPLOADS = join(here, 'uploads');
+// путь берём из config: в облаке он указывает на подключённый диск
+const UPLOADS = paths.uploads;
 mkdirSync(UPLOADS, { recursive: true });
 
 const COOKIE = 'gs_session';

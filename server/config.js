@@ -9,8 +9,18 @@ import { fileURLToPath } from 'node:url';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(here, '..');
-const DATA_DIR = join(here, 'data');
+
+/**
+ * Где хранить то, что переживает перезапуск: базу и загруженные файлы.
+ * По умолчанию — рядом с кодом (удобно на своей машине). В облаке диск
+ * обычно один и монтируется в отдельную точку, поэтому путь задаётся
+ * переменной STORAGE_DIR, а база и загрузки лежат в ней подпапками.
+ */
+const STORAGE_DIR = process.env.STORAGE_DIR || here;
+const DATA_DIR = join(STORAGE_DIR, 'data');
+const UPLOADS_DIR = join(STORAGE_DIR, 'uploads');
 mkdirSync(DATA_DIR, { recursive: true });
+mkdirSync(UPLOADS_DIR, { recursive: true });
 
 // Node умеет читать .env сам, начиная с 20.6
 const ENV_FILE = join(ROOT, '.env');
@@ -98,4 +108,4 @@ export const config = {
   requireVerifiedEmailForCheckout: flag('REQUIRE_VERIFIED_EMAIL', true),
 };
 
-export const paths = { root: ROOT, dataDir: DATA_DIR, uploads: join(here, 'uploads') };
+export const paths = { root: ROOT, dataDir: DATA_DIR, uploads: UPLOADS_DIR };
