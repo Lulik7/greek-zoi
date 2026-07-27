@@ -424,7 +424,7 @@ function GreeceMap({ onGo }: { onGo: (to: string) => void }) {
             top: `${p.y + p.oy}%`,
             transform: 'translate(-50%, -50%)',
             zIndex: 3,
-            width: { xs: 142, sm: 190, md: 216 },
+            width: { xs: 122, sm: 162, md: 184 },
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
@@ -468,10 +468,10 @@ function GreeceMap({ onGo }: { onGo: (to: string) => void }) {
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: 0.5,
-                px: { xs: 1.25, sm: 2 },
+                px: { xs: 1, sm: 1.75 },
                 // высокие поля — облако получается пухлым, а не приплюснутым
-                pt: { xs: 3.5, sm: 4.25 },
-                pb: { xs: 3, sm: 3.75 },
+                pt: { xs: 3, sm: 3.5 },
+                pb: { xs: 2.5, sm: 3 },
               }}
             >
               <Box
@@ -480,13 +480,13 @@ function GreeceMap({ onGo }: { onGo: (to: string) => void }) {
                 sx={{
                   display: 'grid',
                   placeItems: 'center',
-                  width: 24,
-                  height: 24,
+                  width: 21,
+                  height: 21,
                   flexShrink: 0,
                   borderRadius: '50%',
                   bgcolor: YELLOW,
                   border: `2px solid ${INK}`,
-                  fontSize: 14,
+                  fontSize: 12,
                   fontWeight: 900,
                   color: INK,
                 }}
@@ -499,7 +499,7 @@ function GreeceMap({ onGo }: { onGo: (to: string) => void }) {
                   fontWeight: 900,
                   color: HERO_VIOLET,
                   lineHeight: 1.1,
-                  fontSize: { xs: 21, sm: 24 },
+                  fontSize: { xs: 18, sm: 20 },
                 }}
               >
                 {p.short}

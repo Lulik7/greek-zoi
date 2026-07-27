@@ -389,9 +389,11 @@ export default function HomePage() {
             <Box
               sx={{
                 display: 'grid',
-                gap: { xs: 1.5, md: 2 },
+                // на телефоне все шесть уровней в одной строке: колонки узкие,
+                // поэтому описание там прячем и оставляем код со счётчиком
+                gap: { xs: 0.75, sm: 1.5, md: 2 },
                 gridTemplateColumns: {
-                  xs: 'repeat(2, 1fr)',
+                  xs: 'repeat(6, 1fr)',
                   sm: 'repeat(3, 1fr)',
                   md: 'repeat(6, 1fr)',
                 },
@@ -423,7 +425,7 @@ export default function HomePage() {
                         sx={{
                           bgcolor: INK,
                           color: 'common.white',
-                          py: 1.25,
+                          py: { xs: 0.9, sm: 1.25 },
                           textAlign: 'center',
                           borderRadius: '18px 18px 0 0',
                         }}
@@ -432,7 +434,7 @@ export default function HomePage() {
                           sx={{
                             fontFamily: GREEK_FONT,
                             fontWeight: 900,
-                            fontSize: { xs: 26, md: 30 },
+                            fontSize: { xs: 17, sm: 26, md: 30 },
                             lineHeight: 1,
                             color: YELLOW,
                           }}
@@ -443,14 +445,17 @@ export default function HomePage() {
                       <CardContent
                         sx={{
                           textAlign: 'center',
-                          px: 1.5,
+                          px: { xs: 0.5, sm: 1.5 },
+                          py: { xs: 1, sm: 2 },
                           bgcolor: SCENE_GROUND,
+                          '&:last-child': { pb: { xs: 1.25, sm: 2 } },
                         }}
                       >
+                        {/* описание не влезает в узкую колонку — прячем его на телефоне */}
                         <Typography
                           variant="caption"
                           component="div"
-                          sx={{ minHeight: 62, color: INK }}
+                          sx={{ display: { xs: 'none', sm: 'block' }, minHeight: 62, color: INK }}
                         >
                           {l.description}
                         </Typography>
@@ -458,7 +463,13 @@ export default function HomePage() {
                           size="small"
                           color="secondary"
                           label={`${count} шт.`}
-                          sx={{ mt: 1.5, fontWeight: 800, color: INK }}
+                          sx={{
+                            mt: { xs: 0, sm: 1.5 },
+                            fontWeight: 800,
+                            color: INK,
+                            height: { xs: 20, sm: 24 },
+                            '& .MuiChip-label': { px: { xs: 0.6, sm: 1 }, fontSize: { xs: 10, sm: 13 } },
+                          }}
                         />
                       </CardContent>
                     </CardActionArea>

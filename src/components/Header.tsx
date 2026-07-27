@@ -81,14 +81,20 @@ export default function Header() {
         <Container maxWidth="xl">
           <Toolbar disableGutters sx={{ gap: 1, py: 1, minHeight: { xs: 64, md: 80 } }}>
             {/* В самой верхней полосе — цитата на греческом и её перевод */}
+            {/*
+              На телефоне цитата с переводом занимает почти всю строку и
+              жмёт кнопки — там её не показываем. Вместо неё пустая распорка,
+              иначе «Войти» и бургер уедут к левому краю.
+            */}
+            <Box sx={{ display: { xs: 'block', sm: 'none' }, flexGrow: 1 }} />
             <Box
               component={RouterLink}
               to="/"
               sx={{
                 flexGrow: 1,
                 minWidth: 0,
-                textDecoration: 'none',
-                display: 'flex',
+                textDecoration: { xs: 'none', sm: 'none' },
+                display: { xs: 'none', sm: 'flex' },
                 alignItems: 'center',
                 gap: 1.5,
               }}
