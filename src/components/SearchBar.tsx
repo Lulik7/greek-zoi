@@ -29,13 +29,13 @@ export default function SearchBar({ initial = '' }: { initial?: string }) {
       sx={{
         p: { xs: 2, md: 3 },
         borderRadius: 4,
-        border: '1px solid',
-        borderColor: 'divider',
-        boxShadow: '0 24px 60px -32px rgba(8,55,95,0.55)',
+        border: '1px solid rgba(33,25,95,0.1)',
+        bgcolor: '#ffffff',
+        boxShadow: '0 24px 60px -32px rgba(33,25,95,0.28)',
       }}
       elevation={0}
     >
-      <Typography variant="h6" sx={{ mb: 1.5 }}>
+      <Typography variant="h6" sx={{ mb: 1.5, color: 'text.primary' }}>
         Что послушаем сегодня?
       </Typography>
       <Box sx={{ display: 'flex', gap: 1.5, flexDirection: { xs: 'column', sm: 'row' } }}>

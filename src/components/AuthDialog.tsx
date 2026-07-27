@@ -22,13 +22,15 @@ interface Props {
   /** Текст-подсказка, если окно открыли из закрытого материала */
   reason?: string;
   onSuccess?: () => void;
+  /** С какой вкладки открыть: вход или регистрация */
+  initialMode?: 'login' | 'register';
 }
 
 type Mode = 'login' | 'register' | 'forgot';
 
-export default function AuthDialog({ open, onClose, reason, onSuccess }: Props) {
+export default function AuthDialog({ open, onClose, reason, onSuccess, initialMode = 'login' }: Props) {
   const { login, register, db } = useApp();
-  const [mode, setMode] = useState<Mode>('login');
+  const [mode, setMode] = useState<Mode>(initialMode);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');

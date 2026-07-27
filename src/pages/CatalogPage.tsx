@@ -2,10 +2,10 @@ import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import {
   Alert,
-  Box,
   Chip,
   Container,
   Divider,
+  Paper,
   Stack,
   ToggleButton,
   ToggleButtonGroup,
@@ -17,6 +17,7 @@ import TrackCard from '../components/TrackCard';
 import LockedDialog from '../components/LockedDialog';
 import { filterTracks, interpretQuery } from '../lib/search';
 import type { Track } from '../types';
+import { HERO_VIOLET, INK, YELLOW } from '../theme';
 
 export default function CatalogPage() {
   const { db, logEvent } = useApp();
@@ -74,39 +75,88 @@ export default function CatalogPage() {
       <Stack spacing={3}>
         <SearchBar initial={q} />
 
-        <Box>
-          <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
-            Уровень
-          </Typography>
-          <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: 'wrap' }}>
-            {db.levels.map((l) => (
-              <Chip
-                key={l.id}
-                label={l.code}
-                clickable
-                color={levelIds.includes(l.id) ? 'primary' : 'default'}
-                variant={levelIds.includes(l.id) ? 'filled' : 'outlined'}
-                onClick={() => toggleParam('level', l.id)}
-              />
-            ))}
-          </Stack>
+        {/* Уровни и темы — с заливкой, чтобы выделялись на сиреневом фоне */}
+        <Stack spacing={2}>
+          <Paper
+            elevation={0}
+            sx={{
+              p: { xs: 2, sm: 2.5 },
+              borderRadius: 3,
+              bgcolor: '#ffffff',
+              border: '1px solid rgba(33,25,95,0.1)',
+              boxShadow: '0 8px 28px -18px rgba(33,25,95,0.35)',
+            }}
+          >
+            <Typography
+              variant="subtitle1"
+              sx={{ mb: 1.5, fontWeight: 800, color: INK }}
+            >
+              Уровень
+            </Typography>
+            <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: 'wrap' }}>
+              {db.levels.map((l) => {
+                const on = levelIds.includes(l.id);
+                return (
+                  <Chip
+                    key={l.id}
+                    label={l.code}
+                    clickable
+                    onClick={() => toggleParam('level', l.id)}
+                    sx={{
+                      fontWeight: 800,
+                      bgcolor: on ? HERO_VIOLET : 'rgba(124,122,207,0.12)',
+                      color: on ? '#fff' : INK,
+                      border: on ? 'none' : '1px solid rgba(124,122,207,0.35)',
+                      '&:hover': {
+                        bgcolor: on ? '#6B68C0' : 'rgba(124,122,207,0.22)',
+                      },
+                    }}
+                  />
+                );
+              })}
+            </Stack>
+          </Paper>
 
-          <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1, mt: 2 }}>
-            Тема
-          </Typography>
-          <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: 'wrap' }}>
-            {db.topics.map((t) => (
-              <Chip
-                key={t.id}
-                label={`${t.emoji} ${t.title}`}
-                clickable
-                color={topicIds.includes(t.id) ? 'primary' : 'default'}
-                variant={topicIds.includes(t.id) ? 'filled' : 'outlined'}
-                onClick={() => toggleParam('topic', t.id)}
-              />
-            ))}
-          </Stack>
-        </Box>
+          <Paper
+            elevation={0}
+            sx={{
+              p: { xs: 2, sm: 2.5 },
+              borderRadius: 3,
+              bgcolor: '#ffffff',
+              border: '1px solid rgba(33,25,95,0.1)',
+              boxShadow: '0 8px 28px -18px rgba(33,25,95,0.35)',
+            }}
+          >
+            <Typography
+              variant="subtitle1"
+              sx={{ mb: 1.5, fontWeight: 800, color: INK }}
+            >
+              Тема
+            </Typography>
+            <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: 'wrap' }}>
+              {db.topics.map((t) => {
+                const on = topicIds.includes(t.id);
+                return (
+                  <Chip
+                    key={t.id}
+                    label={`${t.emoji} ${t.title}`}
+                    clickable
+                    onClick={() => toggleParam('topic', t.id)}
+                    sx={{
+                      fontWeight: 700,
+                      bgcolor: on ? YELLOW : 'rgba(250,218,27,0.18)',
+                      color: INK,
+                      border: on ? '1px solid rgba(33,25,95,0.2)' : '1px solid rgba(250,218,27,0.45)',
+                      '&:hover': {
+                        bgcolor: on ? '#FFE056' : 'rgba(250,218,27,0.32)',
+                      },
+                    }}
+                  />
+                );
+              })}
+            </Stack>
+          </Paper>
+        </Stack>
 
         <Divider />
 

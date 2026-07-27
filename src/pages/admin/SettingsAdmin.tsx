@@ -212,7 +212,7 @@ export default function SettingsAdmin() {
                   fontSize: 26,
                   textAlign: 'center',
                   background:
-                    'linear-gradient(180deg, rgba(6,31,56,.72) 0%, rgba(8,55,95,.66) 100%)',
+                    'linear-gradient(180deg, rgba(33,25,95,.72) 0%, rgba(124,122,207,.55) 100%)',
                 }}
               >
                 Так это будет выглядеть

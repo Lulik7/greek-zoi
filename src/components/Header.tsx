@@ -26,10 +26,11 @@ import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import WorkspacePremiumIcon from '@mui/icons-material/WorkspacePremium';
 import { useApp } from '../store/AppContext';
 import AuthDialog from './AuthDialog';
-import { GREEK_FONT, HERO_VIOLET } from '../theme';
+import { GREEK_FONT, HERO_VIOLET, INK, YELLOW } from '../theme';
 
-const NAV = [
+const NAV: { to: string; label: string; sub?: string }[] = [
   { to: '/', label: 'Главная' },
+  { to: '/map', label: 'Карта сайта', sub: '(игры)' },
   { to: '/catalog', label: 'Каталог' },
   { to: '/all', label: 'Все материалы' },
   { to: '/subscribe', label: 'Подписка' },
@@ -39,6 +40,11 @@ export default function Header() {
   const { db, user, isAdmin, hasSubscription, logout } = useApp();
   const nav = useNavigate();
   const [authOpen, setAuthOpen] = useState(false);
+  const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
+  const openAuth = (mode: 'login' | 'register' = 'login') => {
+    setAuthMode(mode);
+    setAuthOpen(true);
+  };
   const [anchor, setAnchor] = useState<null | HTMLElement>(null);
   const [drawer, setDrawer] = useState(false);
   const s = db?.settings;
@@ -54,7 +60,23 @@ export default function Header() {
         position="sticky"
         color="inherit"
         elevation={0}
-        sx={{ bgcolor: HERO_VIOLET, color: 'common.white' }}
+        sx={{
+          bgcolor: HERO_VIOLET,
+          color: 'common.white',
+          boxShadow: 'none !important',
+          border: 'none !important',
+          borderBottom: 'none !important',
+          backgroundImage: 'none !important',
+          outline: 'none',
+          // MUI Paper иногда рисует нижнюю линию
+          '&.MuiPaper-root': {
+            boxShadow: 'none !important',
+            border: 'none !important',
+            borderBottom: 'none !important',
+            backgroundImage: 'none !important',
+          },
+          '&::before, &::after': { display: 'none' },
+        }}
       >
         <Container maxWidth="xl">
           <Toolbar disableGutters sx={{ gap: 1, py: 1, minHeight: { xs: 64, md: 80 } }}>
@@ -77,22 +99,34 @@ export default function Header() {
                   fontSize: 26,
                   flexShrink: 0,
                   display: { xs: 'none', sm: 'block' },
+                  transform: 'scaleX(-1)',
                 }}
               />
-              <Box sx={{ minWidth: 0 }}>
-                <Typography
-                  sx={{
-                    fontFamily: GREEK_FONT,
-                    fontStyle: 'italic',
-                    fontWeight: 700,
-                    fontSize: { xs: 15.5, sm: 19, md: 21 },
-                    lineHeight: 1.25,
-                    color: 'secondary.main',
-                  }}
-                  noWrap
-                >
-                  {s?.heroQuoteEl}
-                </Typography>
+              <Box sx={{ minWidth: 0, flex: 1 }}>
+                <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center', minWidth: 0 }}>
+                  <Typography
+                    sx={{
+                      fontFamily: GREEK_FONT,
+                      fontStyle: 'italic',
+                      fontWeight: 700,
+                      fontSize: { xs: 15.5, sm: 19, md: 21 },
+                      lineHeight: 1.25,
+                      color: 'secondary.main',
+                      minWidth: 0,
+                    }}
+                    noWrap
+                  >
+                    {s?.heroQuoteEl}
+                  </Typography>
+                  <FormatQuoteIcon
+                    sx={{
+                      color: 'secondary.main',
+                      fontSize: 26,
+                      flexShrink: 0,
+                      display: { xs: 'none', sm: 'block' },
+                    }}
+                  />
+                </Stack>
                 <Typography
                   variant="caption"
                   component="div"
@@ -117,6 +151,7 @@ export default function Header() {
                   to={n.to}
                   color="inherit"
                   sx={{
+                    position: 'relative',
                     px: 1.75,
                     color: 'common.white',
                     fontWeight: 800,
@@ -127,6 +162,31 @@ export default function Header() {
                   }}
                 >
                   {n.label}
+                  {/*
+                    Вторая строка вынесена из потока: иначе она растягивала кнопку
+                    и пункт вставал выше соседних. Так все названия на одном уровне.
+                  */}
+                  {n.sub && (
+                    <Box
+                      component="span"
+                      sx={{
+                        position: 'absolute',
+                        top: '78%',
+                        left: 0,
+                        right: 0,
+                        textAlign: 'center',
+                        pointerEvents: 'none',
+                        fontSize: 14,
+                        fontWeight: 900,
+                        lineHeight: 1,
+                        letterSpacing: '0.02em',
+                        color: 'secondary.main',
+                        textTransform: 'lowercase',
+                      }}
+                    >
+                      {n.sub}
+                    </Box>
+                  )}
                 </Button>
               ))}
             </Stack>
@@ -184,20 +244,53 @@ export default function Header() {
                 </Menu>
               </>
             ) : (
-              <Button
-                variant="contained"
-                color="secondary"
-                size="small"
-                onClick={() => setAuthOpen(true)}
-                sx={{
-                  px: { xs: 2, sm: 2.5 },
-                  color: 'primary.dark',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.03em',
-                }}
-              >
-                Войти
-              </Button>
+              <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+                {/* как LOG IN / SIGN UP в референс-видео: контур + жёлтая таблетка */}
+                <Button
+                  variant="outlined"
+                  size="small"
+                  onClick={() => openAuth('login')}
+                  sx={{
+                    display: { xs: 'none', sm: 'inline-flex' },
+                    px: 2,
+                    color: 'common.white',
+                    borderColor: 'rgba(255,255,255,0.75)',
+                    borderWidth: 2,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.04em',
+                    fontWeight: 800,
+                    fontSize: 13,
+                    '&:hover': {
+                      borderWidth: 2,
+                      borderColor: YELLOW,
+                      color: YELLOW,
+                      bgcolor: 'rgba(255,255,255,0.08)',
+                    },
+                  }}
+                >
+                  Войти
+                </Button>
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  size="small"
+                  onClick={() => openAuth('register')}
+                  sx={{
+                    px: { xs: 2, sm: 2.5 },
+                    color: INK,
+                    bgcolor: YELLOW,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.04em',
+                    fontWeight: 900,
+                    fontSize: 13,
+                    border: `2px solid ${INK}`,
+                    boxShadow: `0 3px 0 ${INK}`,
+                    '&:hover': { bgcolor: '#FFE056', boxShadow: `0 4px 0 ${INK}` },
+                  }}
+                >
+                  Регистрация
+                </Button>
+              </Stack>
             )}
 
             <IconButton
@@ -222,7 +315,7 @@ export default function Header() {
           <List>
             {NAV.map((n) => (
               <ListItemButton key={n.to} onClick={() => goto(n.to)}>
-                <ListItemText primary={n.label} />
+                <ListItemText primary={n.label} secondary={n.sub} />
               </ListItemButton>
             ))}
             {user && (
@@ -251,22 +344,41 @@ export default function Header() {
                 Выйти
               </Button>
             ) : (
-              <Button
-                fullWidth
-                variant="contained"
-                onClick={() => {
-                  setDrawer(false);
-                  setAuthOpen(true);
-                }}
-              >
-                Войти
-              </Button>
+              <Stack spacing={1}>
+                <Button
+                  fullWidth
+                  variant="outlined"
+                  onClick={() => {
+                    setDrawer(false);
+                    openAuth('login');
+                  }}
+                >
+                  Войти
+                </Button>
+                <Button
+                  fullWidth
+                  variant="contained"
+                  color="secondary"
+                  onClick={() => {
+                    setDrawer(false);
+                    openAuth('register');
+                  }}
+                  sx={{ color: INK, fontWeight: 900 }}
+                >
+                  Регистрация
+                </Button>
+              </Stack>
             )}
           </Box>
         </Box>
       </Drawer>
 
-      <AuthDialog open={authOpen} onClose={() => setAuthOpen(false)} />
+      <AuthDialog
+        key={authMode}
+        open={authOpen}
+        onClose={() => setAuthOpen(false)}
+        initialMode={authMode}
+      />
     </>
   );
 }

@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Alert, Container, Divider, Tab, Tabs, Typography } from '@mui/material';
 import { useApp } from '../../store/AppContext';
+import AdminWelcomeCloud from '../../components/AdminWelcomeCloud';
 import TracksAdmin from './TracksAdmin';
 import TaxonomyAdmin from './TaxonomyAdmin';
 import SettingsAdmin from './SettingsAdmin';
@@ -18,6 +19,8 @@ const TABS = [
 export default function AdminPage() {
   const { isAdmin, loading } = useApp();
   const [tab, setTab] = useState(0);
+  const [welcomeDone, setWelcomeDone] = useState(false);
+  const onWelcomeDone = useCallback(() => setWelcomeDone(true), []);
 
   if (loading) return null;
 
@@ -30,6 +33,11 @@ export default function AdminPage() {
         </Alert>
       </Container>
     );
+  }
+
+  // сначала облачко ~3 с, панель — после улёта
+  if (!welcomeDone) {
+    return <AdminWelcomeCloud onDone={onWelcomeDone} />;
   }
 
   return (

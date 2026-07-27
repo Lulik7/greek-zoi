@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Link as RouterLink } from 'react-router-dom';
+import { Link as RouterLink, useLocation } from 'react-router-dom';
 import {
   Box,
   Button,
@@ -10,69 +10,26 @@ import {
   Container,
   Stack,
   Typography,
-  type SxProps,
-  type Theme,
 } from '@mui/material';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { useApp } from '../store/AppContext';
 import SearchBar from '../components/SearchBar';
 import VideoBlock from '../components/VideoBlock';
-import HeroFigure from '../components/HeroFigure';
+import FloatingDecor from '../components/FloatingDecor';
+import SiteMapTour from '../components/SiteMapTour';
+import AccessibilityPanel from '../components/AccessibilityPanel';
+import MusicQuotesBand from '../components/MusicQuotesBand';
 import { useLogoLines } from '../lib/title';
-import { cartoonTitle, GREEK_FONT, HERO_VIOLET } from '../theme';
-
-/**
- * Кусочек рисунка-образца: вырезаем прямоугольник (x, y, ширина, высота) из
- * картинки и показываем нужного размера. Так на странице оказываются только
- * рисунки — кувшин, оливки, лимоны, атлет — без чужих надписей.
- */
-const IMG_W = 1440;
-const IMG_H = 720;
-
-/** Прямоугольник с фигурой атлета в кадре видео (768×384) */
-const ATHLETE_CROP: [number, number, number, number] = [442, 16, 206, 229];
-/** Кнопки чужого сайта, попадающие в верх кадра, — стираем их */
-const ATHLETE_ERASE: [number, number, number, number][] = [[512, 0, 260, 38]];
-
-/** Что берём из картинки-образца и куда ставим в первом блоке */
-const DECOR = [
-  { key: 'jug', rect: [40, 92, 155, 220] as [number, number, number, number], width: 104, place: { left: '2%', top: '12%' } },
-  { key: 'plum', rect: [90, 335, 105, 110] as [number, number, number, number], width: 72, place: { left: '4%', bottom: '14%' } },
-  { key: 'olives1', rect: [696, 100, 130, 96] as [number, number, number, number], width: 92, place: { left: { sm: '58%', md: '62%' }, top: '11%' } },
-  { key: 'olives2', rect: [690, 336, 135, 96] as [number, number, number, number], width: 86, place: { left: { sm: '40%', md: '46%' }, bottom: '12%' } },
-  { key: 'lemon', rect: [1236, 104, 128, 132] as [number, number, number, number], width: 82, place: { left: { sm: '24%', md: '30%' }, bottom: '8%', display: { xs: 'none', lg: 'block' } } },
-];
-
-function Deco({
-  src,
-  rect,
-  width,
-  sx = {},
-}: {
-  src: string;
-  rect: [number, number, number, number];
-  width: number;
-  sx?: SxProps<Theme>;
-}) {
-  const [x, y, w, h] = rect;
-  const k = width / w;
-  return (
-    <Box
-      aria-hidden
-      sx={{
-        position: 'absolute',
-        width,
-        height: h * k,
-        backgroundImage: `url(${src})`,
-        backgroundSize: `${IMG_W * k}px ${IMG_H * k}px`,
-        backgroundPosition: `${-x * k}px ${-y * k}px`,
-        backgroundRepeat: 'no-repeat',
-        pointerEvents: 'none',
-        ...sx,
-      }}
-    />
-  );
-}
+import {
+  cartoonTitle,
+  GREEK_FONT,
+  HERO_VIOLET,
+  INK,
+  PAGE_BG,
+  SCENE_GROUND,
+  TEXT_ON_DARK,
+  YELLOW,
+} from '../theme';
 
 /** Русское склонение после числа: 1 уровень, 2 уровня, 5 уровней */
 function plural(n: number, one: string, few: string, many: string) {
@@ -86,11 +43,18 @@ function plural(n: number, one: string, few: string, many: string) {
 function SectionTitle({ children, hint }: { children: string; hint?: string }) {
   return (
     <Box sx={{ mb: 2.5 }}>
-      <Typography variant="h5" sx={{ fontSize: { xs: 22, md: 26 } }}>
+      <Typography
+        variant="h5"
+        sx={{
+          fontSize: { xs: 22, md: 28 },
+          fontWeight: 900,
+          color: INK,
+        }}
+      >
         {children}
       </Typography>
       {hint && (
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+        <Typography variant="body2" sx={{ mt: 0.5, color: 'text.secondary' }}>
           {hint}
         </Typography>
       )}
@@ -101,76 +65,127 @@ function SectionTitle({ children, hint }: { children: string; hint?: string }) {
 export default function HomePage() {
   const { db, logEvent } = useApp();
   const [line1, line2] = useLogoLines();
+  const { hash } = useLocation();
 
   useEffect(() => {
     logEvent({ type: 'page', path: '/' });
   }, [logEvent]);
+
+  /**
+   * Переход с карты сайта: «/#home-levels» — прокрутить к нужному разделу.
+   * Блок может появиться на кадр позже, поэтому ждём его несколько кадров.
+   */
+  useEffect(() => {
+    if (!hash) return;
+    const id = hash.slice(1);
+    let tries = 0;
+    let raf = 0;
+    const tick = () => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        return;
+      }
+      if (tries++ < 30) raf = requestAnimationFrame(tick);
+    };
+    tick();
+    return () => cancelAnimationFrame(raf);
+  }, [hash]);
 
   if (!db) return null;
   const { settings, levels, topics, tracks } = db;
   const published = tracks.filter((t) => t.published);
 
   return (
-    <Box>
-      {/* Первый блок: название школы на сиреневом фоне, как в выбранном образце */}
+    <Box sx={{ bgcolor: 'transparent' }}>
+      {/* слева: карта сайта с Посейдоном */}
+      <SiteMapTour />
+      {/* справа: специальные возможности — размер, контраст, анимация */}
+      <AccessibilityPanel />
+
+      {/* Hero: сиреневый + сцена справа (как раньше), герои мельче */}
       <Box
         sx={{
           position: 'relative',
           overflow: 'hidden',
           color: 'common.white',
           bgcolor: HERO_VIOLET,
-          minHeight: { md: 430 },
-          // плашка вспыхивает ярче в такт лучам
+          minHeight: { sm: 500, md: 540 },
+          pb: { xs: 2, md: 4 },
+          // сплошной цвет — без градиента сверху, чтобы не было шва с header
+          backgroundImage: 'none',
+          borderTop: 'none',
+          boxShadow: 'none',
           '@keyframes platePulse': {
             '0%, 100%': {
               transform: 'scale(1)',
               filter: 'brightness(1)',
-              boxShadow: '0 5px 0 rgba(36,30,85,.28)',
+              boxShadow: `0 5px 0 ${alphaInk(0.28)}`,
             },
             '45%': {
-              transform: 'scale(1.05)',
-              filter: 'brightness(1.22)',
-              boxShadow: '0 5px 0 rgba(36,30,85,.28), 0 0 36px 10px rgba(255,240,140,.85)',
+              transform: 'scale(1.04)',
+              filter: 'brightness(1.12)',
+              boxShadow: `0 5px 0 ${alphaInk(0.28)}, 0 0 32px 8px rgba(250,218,27,.55)`,
             },
-          },
-          // вспышка лучей за жёлтой плашкой — как в видео
-          '@keyframes rayBurst': {
-            '0%, 100%': { opacity: 0, transform: 'translate(-50%, -50%) scale(.72) rotate(0deg)' },
-            '45%': { opacity: 0.55, transform: 'translate(-50%, -50%) scale(1) rotate(7deg)' },
-            '70%': { opacity: 0.18, transform: 'translate(-50%, -50%) scale(1.05) rotate(11deg)' },
-          },
-          '@media (prefers-reduced-motion: reduce)': {
-            '& *': { animation: 'none !important' },
           },
         }}
       >
-        {/* Рисунки-украшения вырезаны из картинки-образца: надписей в них нет */}
-        {settings.heroImageUrl && (
-          <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
-            {DECOR.map((d) => (
-              <Deco key={d.key} src={settings.heroImageUrl} rect={d.rect} width={d.width} sx={d.place} />
-            ))}
-          </Box>
-        )}
+        {/*
+          HERO VIDEO: top/bottom = 0 + height 100% + cover — без полосок.
+          Герои меньше за счёт узкой панели (38%), без scale.
+        */}
+        <Box
+          component="video"
+          aria-hidden
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="auto"
+          src="/media/hero-style-scene-hd.mp4?v=5"
+          sx={{
+            position: 'absolute',
+            // как ~3 шага назад: у правого края, шире к центру (~32%)
+            right: 0,
+            top: 0,
+            bottom: 0,
+            width: { xs: '52%', md: '32%' },
+            height: '100%',
+            objectFit: 'cover',
+            objectPosition: 'center center',
+            opacity: { xs: 0.5, md: 0.88 },
+            pointerEvents: 'none',
+            zIndex: 0,
+            border: 0,
+            outline: 0,
+            boxShadow: 'none',
+            // только мягкий левый край; сверху/снизу без полосок
+            maskImage:
+              'linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.4) 22%, #000 50%, #000 100%)',
+            WebkitMaskImage:
+              'linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.4) 22%, #000 50%, #000 100%)',
+          }}
+        />
 
-        {/* Атлет — живая фигура из видео, стоит справа, как в образце */}
-        {settings.heroVideoUrl && (
-          <HeroFigure
-            src={settings.heroVideoUrl}
-            crop={ATHLETE_CROP}
-            erase={ATHLETE_ERASE}
-            sx={{
-              position: 'absolute',
-              right: { md: 30, lg: 90 },
-              bottom: { md: 30, lg: 36 },
-              display: { xs: 'none', md: 'block' },
-              width: { md: 250, lg: 292 },
-              height: 'auto',
-            }}
-          />
-        )}
+        {/* сирень слева под текст */}
+        <Box
+          aria-hidden
+          sx={{
+            position: 'absolute',
+            left: 0,
+            top: 0,
+            bottom: 0,
+            width: { xs: '55%', md: '55%' },
+            zIndex: 1,
+            pointerEvents: 'none',
+            background: `linear-gradient(90deg, ${HERO_VIOLET} 0%, ${HERO_VIOLET} 75%, transparent 100%)`,
+          }}
+        />
 
-        <Container maxWidth="lg" sx={{ position: 'relative', py: { xs: 6, sm: 8, md: 11 } }}>
+        {/* лимоны, оливки, слива на hero — как было (не убирать) */}
+        <FloatingDecor />
+
+        <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 2, py: { xs: 6, sm: 7, md: 10 } }}>
           <Stack
             sx={{
               alignItems: { xs: 'center', md: 'flex-start' },
@@ -178,79 +193,110 @@ export default function HomePage() {
               maxWidth: { md: '58%' },
             }}
           >
-            <Typography
-              component="h1"
-              sx={{
-                ...cartoonTitle,
-                fontWeight: 900,
-                lineHeight: 1.05,
-                // подбирается под ширину экрана, чтобы «ГОВОРЮ ПО-ГРЕЧЕСКИ» не рвалось
-                fontSize: 'clamp(25px, 6.6vw, 58px)',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              {line1}
-            </Typography>
-            {line2 && (
+            {/*
+              Заголовок снова слева, как было.
+              Кувшин — absolute слева от слов, текст не сдвигает.
+            */}
+            <Box sx={{ position: 'relative' }}>
+              {/* оболочка держит позицию; анимация — на img внутри */}
+              <Box
+                sx={{
+                  display: { xs: 'none', sm: 'block' },
+                  position: 'absolute',
+                  right: '100%',
+                  top: '50%',
+                  mr: 1.25,
+                  transform: 'translateY(-50%)',
+                  width: { sm: 68, md: 84 },
+                  lineHeight: 0,
+                  pointerEvents: 'none',
+                }}
+              >
+                <Box
+                  component="img"
+                  className="decor-jug"
+                  src="/decor/jug.png"
+                  alt=""
+                  draggable={false}
+                  sx={{
+                    display: 'block',
+                    width: '100%',
+                    height: 'auto',
+                    // лёгкое покачивание (класс + inline — чтобы точно играло)
+                    animation: 'decor-jug 2.8s ease-in-out infinite !important',
+                    transformOrigin: '50% 85%',
+                    filter: 'drop-shadow(0 4px 10px rgba(33,25,95,.28))',
+                  }}
+                />
+              </Box>
               <Typography
-                component="div"
+                component="h1"
+                className="hero-title-fly"
                 sx={{
                   ...cartoonTitle,
                   fontWeight: 900,
-                  lineHeight: 1.05,
-                  fontSize: 'clamp(25px, 6.6vw, 58px)',
+                  lineHeight: 1.02,
+                  fontSize: 'clamp(26px, 6.8vw, 60px)',
                   whiteSpace: 'nowrap',
                 }}
               >
-                {line2}
+                {line1}
               </Typography>
-            )}
+              {line2 && (
+                <Typography
+                  component="div"
+                  className="hero-title-fly hero-title-fly-delay"
+                  sx={{
+                    ...cartoonTitle,
+                    fontWeight: 900,
+                    lineHeight: 1.02,
+                    fontSize: 'clamp(26px, 6.8vw, 60px)',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {line2}
+                </Typography>
+              )}
+            </Box>
 
-            {/* Название школы — жёлтая плашка с пульсирующими лучами, как в видео */}
+            <Typography
+              sx={{
+                mt: 1.75,
+                maxWidth: 440,
+                fontSize: { xs: 15.5, md: 18 },
+                fontWeight: 600,
+                lineHeight: 1.4,
+                color: 'rgba(255,255,255,0.92)',
+                textShadow: '0 1px 8px rgba(33,25,95,.25)',
+              }}
+            >
+              Песни и диалоги с текстом — слушайте и говорите по-гречески
+            </Typography>
+
             <Box
               component={RouterLink}
               to="/catalog"
               sx={{
                 mt: { xs: 3, md: 3.5 },
-                position: 'relative',
                 display: 'inline-block',
                 textDecoration: 'none',
-                isolation: 'isolate',
+                px: { xs: 2.75, md: 3.75 },
+                py: { xs: 1.15, md: 1.45 },
+                borderRadius: 999,
+                bgcolor: YELLOW,
+                color: INK,
+                fontSize: { xs: 15, md: 18 },
+                fontWeight: 900,
+                lineHeight: 1.3,
+                letterSpacing: '0.02em',
+                textTransform: 'uppercase',
+                boxShadow: `0 5px 0 ${alphaInk(0.3)}`,
+                animation: 'platePulse 3.2s ease-in-out infinite',
+                border: `2px solid ${alphaInk(0.12)}`,
+                '&:hover': { filter: 'brightness(1.05)' },
               }}
             >
-              {/* белые лучи за плашкой */}
-              <Box
-                aria-hidden
-                sx={{
-                  position: 'absolute',
-                  left: '50%',
-                  top: '50%',
-                  width: { xs: 420, md: 620 },
-                  height: { xs: 420, md: 620 },
-                  zIndex: -1,
-                  background:
-                    'repeating-conic-gradient(from 0deg, rgba(255,255,255,.9) 0deg 5deg, rgba(255,255,255,0) 5deg 13deg)',
-                  maskImage: 'radial-gradient(closest-side, #000 18%, transparent 72%)',
-                  WebkitMaskImage: 'radial-gradient(closest-side, #000 18%, transparent 72%)',
-                  animation: 'rayBurst 3.2s ease-in-out infinite',
-                }}
-              />
-              <Box
-                sx={{
-                  px: { xs: 2.5, md: 3.5 },
-                  py: { xs: 1.1, md: 1.4 },
-                  borderRadius: 999,
-                  bgcolor: 'secondary.main',
-                  color: 'primary.dark',
-                  fontSize: { xs: 15.5, md: 20 },
-                  fontWeight: 800,
-                  lineHeight: 1.35,
-                  boxShadow: '0 5px 0 rgba(36,30,85,.28)',
-                  animation: 'platePulse 3.2s ease-in-out infinite',
-                }}
-              >
-                {settings.subtitle}
-              </Box>
+              {settings.subtitle}
             </Box>
 
             <Stack
@@ -272,10 +318,11 @@ export default function HomePage() {
                   key={label}
                   label={label}
                   sx={{
-                    bgcolor: 'rgba(255,255,255,0.14)',
+                    bgcolor: 'rgba(255,255,255,0.16)',
                     color: 'inherit',
-                    border: '1px solid rgba(255,255,255,0.22)',
+                    border: '1px solid rgba(255,255,255,0.28)',
                     backdropFilter: 'blur(4px)',
+                    fontWeight: 700,
                   }}
                 />
               ))}
@@ -283,29 +330,31 @@ export default function HomePage() {
           </Stack>
         </Container>
 
-        {/* волна снизу — приём из выбранного образца */}
+        {/* волна в цвет фона сайта */}
         <Box
           component="svg"
           aria-hidden
           viewBox="0 0 1440 90"
           preserveAspectRatio="none"
-          sx={{ display: 'block', width: '100%', height: { xs: 34, md: 64 }, position: 'relative' }}
+          sx={{ display: 'block', width: '100%', height: { xs: 36, md: 72 }, position: 'relative', zIndex: 2 }}
         >
           <path
             d="M0,38 C220,86 430,4 720,26 C1010,48 1230,92 1440,44 L1440,90 L0,90 Z"
-            fill="#F6F3FF"
+            fill={PAGE_BG}
           />
         </Box>
       </Box>
 
       <Container maxWidth="lg" sx={{ pb: { xs: 4, md: 6 } }}>
         <Stack spacing={{ xs: 5, md: 8 }}>
-          {/* Поиск — приподнят к волне, как главный инструмент */}
-          <Box sx={{ mt: { xs: -2, md: -4 }, position: 'relative', zIndex: 1 }}>
+          <Box
+            id="home-search"
+            sx={{ mt: { xs: -2.5, md: -5 }, position: 'relative', zIndex: 3, scrollMarginTop: 88 }}
+          >
             <SearchBar />
           </Box>
 
-          <Box>
+          <Box id="home-watch" sx={{ scrollMarginTop: 88 }}>
             <SectionTitle hint="Посмотрите, как всё устроено, и послушайте песню, которую Зоя разбирает в этом месяце.">
               Смотрим и слушаем
             </SectionTitle>
@@ -331,7 +380,7 @@ export default function HomePage() {
             </Box>
           </Box>
 
-          <Box>
+          <Box id="home-levels" sx={{ scrollMarginTop: 88 }}>
             <SectionTitle hint="Выберите свой уровень — откроются подходящие песни и диалоги.">
               Уровни
             </SectionTitle>
@@ -353,10 +402,13 @@ export default function HomePage() {
                     key={l.id}
                     sx={{
                       overflow: 'hidden',
+                      borderRadius: 3.5,
+                      border: 'none',
+                      bgcolor: '#ffffff',
+                      boxShadow: `0 10px 28px -16px rgba(33,25,95,0.35)`,
                       '&:hover': {
                         transform: 'translateY(-4px)',
-                        borderColor: 'primary.main',
-                        boxShadow: '0 20px 38px -22px rgba(36,30,85,0.6)',
+                        boxShadow: `0 18px 36px -16px rgba(33,25,95,0.45)`,
                       },
                     }}
                   >
@@ -365,13 +417,13 @@ export default function HomePage() {
                       to={`/catalog?level=${l.id}`}
                       sx={{ height: '100%' }}
                     >
-                      {/* тёмно-фиолетовая шапка карточки — приём из образца */}
                       <Box
                         sx={{
-                          bgcolor: 'primary.dark',
+                          bgcolor: INK,
                           color: 'common.white',
-                          py: 1.1,
+                          py: 1.25,
                           textAlign: 'center',
+                          borderRadius: '18px 18px 0 0',
                         }}
                       >
                         <Typography
@@ -380,17 +432,23 @@ export default function HomePage() {
                             fontWeight: 900,
                             fontSize: { xs: 26, md: 30 },
                             lineHeight: 1,
+                            color: YELLOW,
                           }}
                         >
                           {l.code}
                         </Typography>
                       </Box>
-                      <CardContent sx={{ textAlign: 'center', px: 1.5, bgcolor: '#F3F0FF' }}>
+                      <CardContent
+                        sx={{
+                          textAlign: 'center',
+                          px: 1.5,
+                          bgcolor: SCENE_GROUND,
+                        }}
+                      >
                         <Typography
                           variant="caption"
-                          color="text.secondary"
                           component="div"
-                          sx={{ minHeight: 62 }}
+                          sx={{ minHeight: 62, color: INK }}
                         >
                           {l.description}
                         </Typography>
@@ -398,7 +456,7 @@ export default function HomePage() {
                           size="small"
                           color="secondary"
                           label={`${count} шт.`}
-                          sx={{ mt: 1.5 }}
+                          sx={{ mt: 1.5, fontWeight: 800, color: INK }}
                         />
                       </CardContent>
                     </CardActionArea>
@@ -408,7 +466,10 @@ export default function HomePage() {
             </Box>
           </Box>
 
-          <Box>
+          {/* полоса в цвет шапки: мысли и факты о греческой музыке */}
+          <MusicQuotesBand />
+
+          <Box id="home-topics" sx={{ scrollMarginTop: 88 }}>
             <SectionTitle hint="Или начните с темы — она пригодится в жизни уже завтра.">
               Темы
             </SectionTitle>
@@ -425,11 +486,13 @@ export default function HomePage() {
                     px: 1.5,
                     py: 2.75,
                     fontSize: 16,
-                    bgcolor: 'background.paper',
-                    borderColor: 'divider',
+                    bgcolor: '#ffffff',
+                    borderColor: 'rgba(33,25,95,0.18)',
+                    color: TEXT_ON_DARK,
+                    borderWidth: 1.5,
                     '&:hover': {
-                      borderColor: 'primary.main',
-                      bgcolor: 'rgba(13,94,175,0.06)',
+                      borderColor: HERO_VIOLET,
+                      bgcolor: 'rgba(124,122,207,0.08)',
                     },
                   }}
                 />
@@ -441,10 +504,12 @@ export default function HomePage() {
             sx={{
               textAlign: 'center',
               p: { xs: 3, md: 5 },
-              background: 'linear-gradient(140deg, #ffffff 0%, #eef4fb 100%)',
+              borderRadius: 4,
+              bgcolor: '#ffffff',
+              border: '1px solid rgba(33,25,95,0.1)',
             }}
           >
-            <Typography color="text.secondary" sx={{ mb: 3 }}>
+            <Typography sx={{ mb: 3, fontSize: 16.5, color: 'text.secondary' }}>
               Полный список песен и диалогов школы — с уровнями, темами и пометкой, что открыто.
             </Typography>
             <Button
@@ -452,7 +517,9 @@ export default function HomePage() {
               to="/all"
               size="large"
               variant="contained"
+              color="secondary"
               endIcon={<ArrowForwardIcon />}
+              sx={{ color: INK, fontWeight: 900, px: 3.5 }}
             >
               Открыть полный список
             </Button>
@@ -461,4 +528,8 @@ export default function HomePage() {
       </Container>
     </Box>
   );
+}
+
+function alphaInk(a: number) {
+  return `rgba(33,25,95,${a})`;
 }

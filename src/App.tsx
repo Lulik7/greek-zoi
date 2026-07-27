@@ -3,6 +3,7 @@ import { Route, Routes } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import HomePage from './pages/HomePage';
+import MapPage from './pages/MapPage';
 import CatalogPage from './pages/CatalogPage';
 import AllTracksPage from './pages/AllTracksPage';
 import SubscribePage from './pages/SubscribePage';
@@ -10,6 +11,8 @@ import AccountPage from './pages/AccountPage';
 import AdminPage from './pages/admin/AdminPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import StatusBanners from './components/StatusBanners';
+import SiteDecor from './components/SiteDecor';
+import GreekMythCloud from './components/GreekMythCloud';
 import { useApp } from './store/AppContext';
 
 export default function App() {
@@ -17,34 +20,58 @@ export default function App() {
 
   if (loading) {
     return (
-      <Box sx={{ display: 'grid', placeItems: 'center', minHeight: '100vh' }}>
-        <CircularProgress />
+      <Box
+        className="site-wave-bg"
+        sx={{ display: 'grid', placeItems: 'center', minHeight: '100vh' }}
+      >
+        <SiteDecor />
+        <CircularProgress sx={{ position: 'relative', zIndex: 1 }} />
       </Box>
     );
   }
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <Header />
-      <Box component="main" sx={{ flexGrow: 1 }}>
-        {connectionError && (
-          <Container maxWidth="lg" sx={{ pt: 2 }}>
-            <Alert severity="error">{connectionError}</Alert>
-          </Container>
-        )}
-        <StatusBanners />
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/catalog" element={<CatalogPage />} />
-          <Route path="/all" element={<AllTracksPage />} />
-          <Route path="/subscribe" element={<SubscribePage />} />
-          <Route path="/account" element={<AccountPage />} />
-          <Route path="/reset" element={<ResetPasswordPage />} />
-          <Route path="/admin" element={<AdminPage />} />
-          <Route path="*" element={<HomePage />} />
-        </Routes>
+    <Box
+      className="site-wave-bg"
+      sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', position: 'relative' }}
+    >
+      {/* только фон + декор — z-index 0, не красит формы */}
+      <SiteDecor />
+      {/* контент поверх: карточки/формы со своими белыми фонами */}
+      <Box
+        sx={{
+          position: 'relative',
+          zIndex: 2,
+          display: 'flex',
+          flexDirection: 'column',
+          minHeight: '100vh',
+          bgcolor: 'transparent',
+        }}
+      >
+        <Header />
+        <Box component="main" sx={{ flexGrow: 1, bgcolor: 'transparent' }}>
+          {connectionError && (
+            <Container maxWidth="lg" sx={{ pt: 2 }}>
+              <Alert severity="error">{connectionError}</Alert>
+            </Container>
+          )}
+          <StatusBanners />
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/map" element={<MapPage />} />
+            <Route path="/catalog" element={<CatalogPage />} />
+            <Route path="/all" element={<AllTracksPage />} />
+            <Route path="/subscribe" element={<SubscribePage />} />
+            <Route path="/account" element={<AccountPage />} />
+            <Route path="/reset" element={<ResetPasswordPage />} />
+            <Route path="/admin" element={<AdminPage />} />
+            <Route path="*" element={<HomePage />} />
+          </Routes>
+        </Box>
+        <Footer />
+        {/* внизу: герои мифов + факт/анекдот (не на /subscribe) */}
+        <GreekMythCloud />
       </Box>
-      <Footer />
     </Box>
   );
 }
