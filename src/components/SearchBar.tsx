@@ -92,7 +92,7 @@ export default function SearchBar({ initial = '' }: { initial?: string }) {
            * зазора не оставалось. Поля сдвигают текст внутрь и заставляют
            * переноситься раньше, до края.
            */
-          px: { xs: 1.5, sm: 0 },
+          px: { xs: 2.5, sm: 0 },
           fontSize: { xs: 11, sm: 12 },
           lineHeight: 1.4,
           overflowWrap: 'anywhere',
