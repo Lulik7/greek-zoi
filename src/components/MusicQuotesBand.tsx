@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Box, Typography } from '@mui/material';
 import MusicNoteIcon from '@mui/icons-material/MusicNote';
 import WaveEdge from './WaveEdge';
+import InstrumentCards from './InstrumentCards';
 import { cartoonTitle, HERO_VIOLET, INK, PAGE_BG, YELLOW } from '../theme';
 
 /** Статья под цитатой: коротко о том, из чего состоит греческая песня */
@@ -181,11 +182,12 @@ export default function MusicQuotesBand() {
             sx={{
               ...cartoonTitle,
               fontWeight: 900,
-              WebkitTextStroke: `1.2px ${INK}`,
               color: YELLOW,
-              fontSize: { xs: 22, sm: 27, md: 31 },
+              WebkitTextStroke: `1.6px ${INK}`,
+              fontSize: { xs: 30, sm: 40, md: 48 },
+              lineHeight: 1.1,
               textAlign: 'center',
-              mb: { xs: 2, md: 3 },
+              mb: { xs: 2.5, md: 3.5 },
             }}
           >
             Немного о греческой музыке
@@ -222,6 +224,9 @@ export default function MusicQuotesBand() {
               </Box>
             ))}
           </Box>
+
+          {/* два инструмента под статьёй */}
+          <InstrumentCards />
         </Box>
       </Box>
 
