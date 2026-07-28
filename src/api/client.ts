@@ -95,6 +95,21 @@ export const api = {
     });
   },
 
+  // ---------- перенос и резервная копия ----------
+  /** Скачивает выгрузку содержимого сайта файлом */
+  exportContent: async () => {
+    const res = await fetch('/api/admin/export', { credentials: 'include' });
+    if (!res.ok) throw new Error(`Не удалось выгрузить содержимое (ошибка ${res.status})`);
+    return res.blob();
+  },
+
+  /** Загружает выгрузку обратно. Возвращает, сколько чего получилось */
+  importContent: (data: unknown) =>
+    request<{ levels: number; topics: number; tracks: number }>(
+      '/api/admin/import',
+      json('POST', data),
+    ),
+
   // ---------- статистика ----------
   trackEvent: (e: Omit<VisitEvent, 'id' | 'at'>) =>
     request<{ ok: true }>('/api/events', json('POST', e)),

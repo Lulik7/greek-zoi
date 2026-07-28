@@ -401,6 +401,24 @@ app.put('/api/admin/settings', requireAdmin, (req, res) => {
   res.json(store.setSettings(req.body ?? {}));
 });
 
+/** Выгрузка содержимого сайта файлом — резервная копия и перенос на другой сервер */
+app.get('/api/admin/export', requireAdmin, (_req, res) => {
+  const data = store.exportContent();
+  const day = data.exportedAt.slice(0, 10);
+  res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  res.setHeader('Content-Disposition', `attachment; filename="greek-zoi-${day}.json"`);
+  res.send(JSON.stringify(data, null, 2));
+});
+
+/** Загрузка выгрузки обратно: содержимое заменяется целиком, ученики не трогаются */
+app.post('/api/admin/import', requireAdmin, (req, res) => {
+  try {
+    res.json(store.importContent(req.body));
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
 app.put('/api/admin/users/:id', requireAdmin, (req, res) => {
   if (req.params.id === req.user.id && req.body?.role && req.body.role !== 'admin') {
     return res.status(400).json({ error: 'Нельзя снять с себя права администратора' });

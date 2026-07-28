@@ -309,6 +309,85 @@ export function replaceTopics(topics) {
   return getTopics();
 }
 
+// ------------------------------------------------- перенос и резервная копия
+
+/**
+ * Всё содержимое сайта одним объектом: уровни, темы, материалы с текстами
+ * и настройки. Учеников, оплаты и статистику не выгружаем — это данные
+ * конкретного сервера, и в них личная информация.
+ */
+export function exportContent() {
+  return {
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    levels: getLevels(),
+    topics: getTopics(),
+    tracks: getTracks(),
+    settings: getSettings(),
+  };
+}
+
+/**
+ * Загружает выгрузку обратно: содержимое сайта заменяется целиком.
+ * Ученики и оплаты остаются нетронутыми. Всё внутри одной транзакции —
+ * при любой ошибке база останется в прежнем виде.
+ */
+export function importContent(data) {
+  if (!data || typeof data !== 'object') {
+    throw new Error('Файл не похож на выгрузку сайта');
+  }
+  const { levels, topics, tracks, settings } = data;
+  if (!Array.isArray(levels) || !Array.isArray(topics) || !Array.isArray(tracks)) {
+    throw new Error('В файле нет уровней, тем или материалов — похоже, выбран не тот файл');
+  }
+  if (levels.length === 0) {
+    throw new Error('В файле нет ни одного уровня — загружать нечего');
+  }
+
+  db.exec('BEGIN');
+  try {
+    // связи, тексты и темы материалов уходят каскадом вместе с треками
+    db.prepare('DELETE FROM tracks').run();
+    db.prepare('DELETE FROM levels').run();
+    db.prepare('DELETE FROM topics').run();
+
+    const insLevel = db.prepare(
+      'INSERT INTO levels (id, code, title, description, ord) VALUES (?, ?, ?, ?, ?)',
+    );
+    levels.forEach((l, i) =>
+      insLevel.run(l.id, l.code ?? '', l.title ?? '', l.description ?? '', l.order ?? i + 1),
+    );
+
+    const insTopic = db.prepare(
+      'INSERT INTO topics (id, slug, title, emoji, ord) VALUES (?, ?, ?, ?, ?)',
+    );
+    topics.forEach((t, i) =>
+      insTopic.run(t.id, t.slug ?? t.id, t.title ?? '', t.emoji ?? '', t.order ?? i + 1),
+    );
+
+    tracks.forEach((t, i) =>
+      createTrack(
+        { ...t, published: t.published !== false },
+        t.id,
+        t.createdAt ?? new Date(2026, 0, 1 + i).toISOString(),
+      ),
+    );
+
+    if (settings && typeof settings === 'object') setSettings({ ...SETTINGS, ...settings });
+
+    db.exec('COMMIT');
+  } catch (e) {
+    db.exec('ROLLBACK');
+    throw new Error(`Не удалось загрузить файл: ${e.message}`);
+  }
+
+  return {
+    levels: getLevels().length,
+    topics: getTopics().length,
+    tracks: getTracks().length,
+  };
+}
+
 export function getSettings() {
   const row = db.prepare("SELECT value FROM settings WHERE key = 'site'").get();
   // подмешиваем значения по умолчанию: так новые поля появляются в уже созданной базе

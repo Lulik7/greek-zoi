@@ -6,6 +6,7 @@ import TaxonomyAdmin from './TaxonomyAdmin';
 import SettingsAdmin from './SettingsAdmin';
 import UsersAdmin from './UsersAdmin';
 import StatsAdmin from './StatsAdmin';
+import BackupAdmin from './BackupAdmin';
 
 const TABS = [
   { label: 'Материалы', node: <TracksAdmin /> },
@@ -13,6 +14,7 @@ const TABS = [
   { label: 'Главная и тарифы', node: <SettingsAdmin /> },
   { label: 'Ученики', node: <UsersAdmin /> },
   { label: 'Статистика', node: <StatsAdmin /> },
+  { label: 'Копия и перенос', node: <BackupAdmin /> },
 ];
 
 export default function AdminPage() {
