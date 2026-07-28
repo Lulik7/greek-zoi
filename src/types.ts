@@ -2,7 +2,7 @@
 
 export interface Level {
   id: string;
-  /** Код уровня: A1, A2, B1, B2, Γ1, Γ2 */
+  /** Код уровня: A1, A2, B1, B2 */
   code: string;
   /** Подпись для карточки уровня */
   title: string;
@@ -66,22 +66,17 @@ export interface SubscriptionPlan {
 export interface SiteSettings {
   title: string;
   subtitle: string;
-  /** Цитата в верхней полосе: оригинал, перевод и источник */
-  heroQuoteEl: string;
-  heroQuoteRu: string;
-  heroQuoteSource: string;
-  /** Картинка-образец: из неё берутся рисунки-украшения первого блока */
-  heroImageUrl: string;
-  /** Видео с анимированной фигурой для первого блока. Пусто — фигуры нет */
-  heroVideoUrl: string;
+  /** Номер для Viber / WhatsApp */
   contactPhone: string;
   contactEmail: string;
   contactTelegram: string;
-  contactInstagram: string;
+  /** Имя страницы в Фейсбуке — как оно показывается в подвале */
+  contactFacebook: string;
+  /** Ссылка на страницу в Фейсбуке */
+  contactFacebookUrl: string;
   instructionVideoUrl: string;
   instructionVideoTitle: string;
   featuredVideoUrl: string;
-  featuredVideoTitle: string;
   featuredVideoDescription: string;
   plans: SubscriptionPlan[];
 }

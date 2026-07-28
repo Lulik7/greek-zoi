@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   Box,
   Button,
@@ -7,17 +7,13 @@ import {
   Chip,
   Collapse,
   Divider,
-  IconButton,
   Stack,
-  Tooltip,
   Typography,
 } from '@mui/material';
 import LockIcon from '@mui/icons-material/Lock';
 import LockOpenIcon from '@mui/icons-material/LockOpen';
-import SubtitlesIcon from '@mui/icons-material/Subtitles';
 import MusicNoteIcon from '@mui/icons-material/MusicNote';
 import ForumIcon from '@mui/icons-material/Forum';
-import ReplayIcon from '@mui/icons-material/Replay';
 import type { Level, Topic, Track } from '../types';
 import { useApp } from '../store/AppContext';
 import { GREEK_FONT } from '../theme';
@@ -33,10 +29,7 @@ interface Props {
 
 export default function TrackCard({ track, levels, topics, onLocked, defaultOpen }: Props) {
   const { hasSubscription, hasAccess, logEvent } = useApp();
-  const audioRef = useRef<HTMLAudioElement>(null);
   const [open, setOpen] = useState(!!defaultOpen);
-  const [showText, setShowText] = useState(!!defaultOpen);
-  const [time, setTime] = useState(0);
 
   // сервер сам решает, что показывать: у закрытых материалов нет ни аудио, ни текста
   const unlocked = track.locked === undefined ? track.free || hasAccess : !track.locked;
@@ -50,16 +43,6 @@ export default function TrackCard({ track, levels, topics, onLocked, defaultOpen
     [topics, track.topicIds],
   );
 
-  const timed = track.lyrics.some((l) => typeof l.time === 'number');
-  const activeIndex = useMemo(() => {
-    if (!timed) return -1;
-    let idx = -1;
-    track.lyrics.forEach((l, i) => {
-      if (typeof l.time === 'number' && l.time <= time + 0.15) idx = i;
-    });
-    return idx;
-  }, [time, timed, track.lyrics]);
-
   const handleOpen = () => {
     if (!unlocked) {
       logEvent({ type: 'locked', path: '/catalog', label: track.title });
@@ -68,16 +51,7 @@ export default function TrackCard({ track, levels, topics, onLocked, defaultOpen
     }
     const next = !open;
     setOpen(next);
-    if (next) {
-      setShowText(true);
-      logEvent({ type: 'play', path: '/catalog', label: track.title });
-    }
-  };
-
-  const seek = (t?: number) => {
-    if (typeof t !== 'number' || !audioRef.current) return;
-    audioRef.current.currentTime = t;
-    void audioRef.current.play();
+    if (next) logEvent({ type: 'play', path: '/catalog', label: track.title });
   };
 
   return (
@@ -159,21 +133,6 @@ export default function TrackCard({ track, levels, topics, onLocked, defaultOpen
             >
               {unlocked ? (open ? 'Свернуть' : 'Слушать') : 'Открыть'}
             </Button>
-            {unlocked && (
-              <Tooltip title="Текст с переводом">
-                <span>
-                  <IconButton
-                    onClick={() => {
-                      setOpen(true);
-                      setShowText((v) => !v);
-                    }}
-                    color={showText ? 'primary' : 'default'}
-                  >
-                    <SubtitlesIcon />
-                  </IconButton>
-                </span>
-              </Tooltip>
-            )}
           </Stack>
         </Stack>
 
@@ -181,89 +140,47 @@ export default function TrackCard({ track, levels, topics, onLocked, defaultOpen
           <Divider sx={{ my: 2 }} />
           <Box
             component="audio"
-            ref={audioRef}
             src={track.audioUrl}
             controls
             preload="none"
-            onTimeUpdate={(e) => setTime((e.target as HTMLAudioElement).currentTime)}
             sx={{ width: '100%' }}
           />
 
-          <Stack
-            direction="row"
-            spacing={1}
-            useFlexGap
-            sx={{ mt: 1.5, alignItems: 'center', flexWrap: 'wrap' }}
-          >
-            <Button size="small" startIcon={<SubtitlesIcon />} onClick={() => setShowText((v) => !v)}>
-              {showText ? 'Скрыть текст' : 'Показать текст'}
-            </Button>
-            <Button size="small" startIcon={<ReplayIcon />} onClick={() => seek(0)}>
-              С начала
-            </Button>
-            {timed && (
-              <Typography
-                variant="caption"
-                color="text.secondary"
-                sx={{ display: { xs: 'none', md: 'block' } }}
-              >
-                Текст подсвечивается по ходу записи — нажмите на строку, чтобы перемотать.
+          {/* текст показывается целиком сразу — без подсветки по строкам */}
+          <Box sx={{ mt: 2, bgcolor: 'action.hover', borderRadius: 2, p: { xs: 1.5, sm: 2 } }}>
+            {track.lyrics.length === 0 && (
+              <Typography variant="body2" color="text.secondary">
+                Текст к этому материалу пока не добавлен.
               </Typography>
             )}
-          </Stack>
-
-          <Collapse in={showText}>
-            <Box sx={{ mt: 2, bgcolor: 'action.hover', borderRadius: 2, p: { xs: 1.5, sm: 2 } }}>
-              {track.lyrics.length === 0 && (
-                <Typography variant="body2" color="text.secondary">
-                  Текст к этому материалу пока не добавлен.
-                </Typography>
-              )}
-              <Stack spacing={1}>
-                {track.lyrics.map((line, i) => {
-                  const active = i === activeIndex;
-                  return (
-                    <Box
-                      key={i}
-                      onClick={() => seek(line.time)}
-                      sx={{
-                        cursor: typeof line.time === 'number' ? 'pointer' : 'default',
-                        px: 1.5,
-                        py: 1,
-                        borderRadius: 2,
-                        borderLeft: '3px solid',
-                        borderColor: active ? 'secondary.main' : 'transparent',
-                        bgcolor: active ? 'rgba(53,167,232,0.14)' : 'transparent',
-                        transition: 'background-color .2s',
-                      }}
-                    >
-                      <Typography
-                        sx={{
-                          fontFamily: GREEK_FONT,
-                          fontSize: { xs: 18, sm: 19 },
-                          fontWeight: active ? 700 : 500,
-                          color: active ? 'primary.dark' : 'text.primary',
-                        }}
-                      >
-                        {line.el}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {line.ru}
-                      </Typography>
-                    </Box>
-                  );
-                })}
-              </Stack>
-              {track.note && (
-                <>
-                  <Divider sx={{ my: 2 }} />
-                  <Typography variant="caption" color="text.secondary">
-                    <b>Заметка преподавателя:</b> {track.note}
+            <Stack spacing={1}>
+              {track.lyrics.map((line, i) => (
+                <Box key={i} sx={{ px: 1.5, py: 1 }}>
+                  <Typography
+                    sx={{
+                      fontFamily: GREEK_FONT,
+                      fontSize: { xs: 18, sm: 19 },
+                      fontWeight: 500,
+                      color: 'text.primary',
+                    }}
+                  >
+                    {line.el}
                   </Typography>
-                </>
-              )}
-            </Box>
-          </Collapse>
+                  <Typography variant="body2" color="text.secondary">
+                    {line.ru}
+                  </Typography>
+                </Box>
+              ))}
+            </Stack>
+            {track.note && (
+              <>
+                <Divider sx={{ my: 2 }} />
+                <Typography variant="caption" color="text.secondary">
+                  <b>Заметка преподавателя:</b> {track.note}
+                </Typography>
+              </>
+            )}
+          </Box>
         </Collapse>
       </CardContent>
     </Card>

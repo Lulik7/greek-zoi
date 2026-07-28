@@ -13,7 +13,7 @@ body {
 .site-wave-bg {
   position: relative;
   isolation: isolate;
-  background-color: #f5e6d3;
+  background-color: #ffffff;
   background-image: none;
 }
 
@@ -26,237 +26,11 @@ body {
   overflow: hidden;
 }
 
-.site-decor-item {
-  position: absolute !important;
-  display: block !important;
-  height: auto !important;
-  max-width: none !important;
-  user-select: none;
-  pointer-events: none;
-  /* ярче, чем раньше */
-  opacity: 0.92;
-  filter: brightness(1.12) saturate(1.25) drop-shadow(0 4px 10px rgba(33, 25, 95, 0.22));
-  will-change: transform;
-}
-
-/* качание */
-@keyframes site-sway {
-  0%,
-  100% {
-    transform: rotate(-12deg) translateY(0);
-  }
-  50% {
-    transform: rotate(12deg) translateY(-10px);
-  }
-}
-
-@keyframes site-sway-flip {
-  0%,
-  100% {
-    transform: scaleX(-1) rotate(-12deg) translateY(0);
-  }
-  50% {
-    transform: scaleX(-1) rotate(12deg) translateY(-10px);
-  }
-}
-
-@keyframes site-jug {
-  0%,
-  100% {
-    transform: rotate(-9deg);
-  }
-  50% {
-    transform: rotate(9deg);
-  }
-}
-
-@keyframes site-plum {
-  0%,
-  100% {
-    transform: rotate(-10deg) translateY(0);
-  }
-  50% {
-    transform: rotate(10deg) translateY(-8px);
-  }
-}
-
-/* качается, иногда «улетает» и возвращается */
-@keyframes site-fly {
-  0%,
-  15% {
-    transform: rotate(-10deg) translate(0, 0) scale(1);
-  }
-  28% {
-    transform: rotate(8deg) translate(28px, -36px) scale(1.08);
-  }
-  40% {
-    transform: rotate(-6deg) translate(48px, -20px) scale(1.12);
-  }
-  52% {
-    transform: rotate(12deg) translate(18px, -48px) scale(1.06);
-  }
-  65%,
-  100% {
-    transform: rotate(-10deg) translate(0, 0) scale(1);
-  }
-}
-
-/* лавровый венок — лёгкое покачивание */
-@keyframes site-wreath {
-  0%,
-  100% {
-    transform: rotate(-10deg) scale(1);
-  }
-  50% {
-    transform: rotate(10deg) scale(1.07);
-  }
-}
-
-/* парфенон / арфа — мягкий «парит» */
-@keyframes site-bob {
-  0%,
-  100% {
-    transform: translateY(0) rotate(-2deg);
-  }
-  50% {
-    transform: translateY(-14px) rotate(2deg);
-  }
-}
-
-.site-decor-sway {
-  animation: site-sway 2.8s ease-in-out infinite !important;
-  transform-origin: 50% 70%;
-}
-
-.site-decor-flip {
-  animation: site-sway-flip 3s ease-in-out infinite !important;
-  transform-origin: 50% 70%;
-}
-
-.site-decor-jug {
-  animation: site-jug 2.9s ease-in-out infinite !important;
-  transform-origin: 50% 85%;
-}
-
-.site-decor-plum {
-  animation: site-plum 2.6s ease-in-out infinite !important;
-  transform-origin: 50% 80%;
-}
-
-.site-decor-fly {
-  animation: site-fly 6.5s ease-in-out infinite !important;
-  transform-origin: 50% 50%;
-}
-
-.site-decor-wreath {
-  animation: site-wreath 3.4s ease-in-out infinite !important;
-  transform-origin: 50% 50%;
-}
-
-.site-decor-bob {
-  animation: site-bob 4s ease-in-out infinite !important;
-  transform-origin: 50% 70%;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .site-decor-sway,
-  .site-decor-flip,
-  .site-decor-jug,
-  .site-decor-plum,
-  .site-decor-fly,
-  .site-decor-wreath,
-  .site-decor-bob {
-    animation: none !important;
-  }
-}
-
-/* ===== заголовок: вправо → крупнее → обратно ===== */
-@keyframes title-fly {
-  0%,
-  12% {
-    transform: translateX(0) scale(1);
-  }
-  40% {
-    transform: translateX(72px) scale(1.18);
-  }
-  55% {
-    transform: translateX(72px) scale(1.18);
-  }
-  85%,
-  100% {
-    transform: translateX(0) scale(1);
-  }
-}
-
-.hero-title-fly {
-  display: inline-block;
-  transform-origin: left center;
-  animation: title-fly 4.5s ease-in-out infinite;
-  will-change: transform;
-}
-
-.hero-title-fly-delay {
-  animation-delay: 0.18s;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .hero-title-fly,
-  .hero-title-fly-delay {
-    animation: none !important;
-  }
-}
-
-/* ===== анимация мелких предметов (кувшин, лимоны, оливки) ===== */
-
-@keyframes decor-sway {
-  0% {
-    transform: rotate(-18deg) translateY(0);
-  }
-  50% {
-    transform: rotate(18deg) translateY(-14px);
-  }
-  100% {
-    transform: rotate(-18deg) translateY(0);
-  }
-}
-
-/* кувшин слева — лёгкое покачивание влево-вправо */
-@keyframes decor-jug {
-  0% {
-    transform: rotate(-8deg);
-  }
-  50% {
-    transform: rotate(8deg);
-  }
-  100% {
-    transform: rotate(-8deg);
-  }
-}
-
-/* зеркальный лимон (scaleX -1) — качание с учётом отражения */
-@keyframes decor-sway-flip {
-  0% {
-    transform: scaleX(-1) rotate(-18deg) translateY(0);
-  }
-  50% {
-    transform: scaleX(-1) rotate(18deg) translateY(-14px);
-  }
-  100% {
-    transform: scaleX(-1) rotate(-18deg) translateY(0);
-  }
-}
-
-@keyframes decor-scatter {
-  0%,
-  100% {
-    transform: translate(0, 0) rotate(0deg) scale(1);
-  }
-  45% {
-    transform: translate(var(--sx, 36px), var(--sy, -28px)) rotate(var(--sr, 26deg))
-      scale(1.1);
-  }
-}
-
+/*
+ * Декор неподвижен: по просьбе школы на сайте ничего не двигается —
+ * ни лимоны, ни название сайта.
+ */
+.site-decor-item,
 .decor-item {
   position: absolute !important;
   display: block !important;
@@ -264,107 +38,17 @@ body {
   max-width: none !important;
   user-select: none;
   pointer-events: none;
-  transform-origin: center center;
-  will-change: transform;
-  filter: drop-shadow(0 4px 10px rgba(33, 25, 95, 0.25));
-}
-
-.decor-sway {
-  animation-name: decor-sway !important;
-  animation-duration: 2.2s !important;
-  animation-timing-function: ease-in-out !important;
-  animation-iteration-count: infinite !important;
-}
-
-.decor-jug {
-  animation: decor-jug 2.8s ease-in-out infinite !important;
-  transform-origin: 50% 85% !important;
-  will-change: transform;
-}
-
-/* яблоко/слива внизу слева — лёгкое покачивание */
-@keyframes decor-plum {
-  0% {
-    transform: rotate(-10deg) translateY(0);
-  }
-  50% {
-    transform: rotate(10deg) translateY(-6px);
-  }
-  100% {
-    transform: rotate(-10deg) translateY(0);
-  }
-}
-
-.decor-plum {
-  animation: decor-plum 2.6s ease-in-out infinite !important;
-  transform-origin: 50% 80% !important;
-  will-change: transform;
-}
-
-.decor-sway-flip {
-  animation-name: decor-sway-flip !important;
-  animation-duration: 2.4s !important;
-  animation-timing-function: ease-in-out !important;
-  animation-iteration-count: infinite !important;
-}
-
-.decor-scatter {
-  animation-name: decor-scatter !important;
-  animation-duration: 2s !important;
-  animation-timing-function: ease-in-out !important;
-  animation-iteration-count: infinite !important;
-}
-
-/* hero: венок / парение */
-@keyframes decor-wreath {
-  0%,
-  100% {
-    transform: rotate(-8deg) scale(1);
-  }
-  50% {
-    transform: rotate(8deg) scale(1.06);
-  }
-}
-
-@keyframes decor-bob {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-12px);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .decor-sway,
-  .decor-sway-flip,
-  .decor-scatter,
-  .decor-jug,
-  .decor-plum {
-    animation: none !important;
-  }
+  opacity: 0.92;
+  filter: drop-shadow(0 4px 10px rgba(18, 58, 99, 0.22));
 }
 
 /*
- * Телефон: на узком экране декор налезает на название сайта, а само
- * название ещё и качается — читать неудобно. Поэтому здесь заголовок
- * стоит неподвижно, а оливки, лимоны и венок рядом с ним убраны.
- * Остальной декор по краям не мешает и остаётся.
+ * Телефон: на узком экране декор налезает на название сайта и на поле
+ * поиска — там его не показываем совсем.
  */
-@media (max-width: 1199.98px) {
-  .decor-item[src*='olive'],
-  .decor-item[src*='lemon'],
-  .decor-item[src*='laurel'],
-  .site-decor-item[src*='olive'],
-  .site-decor-item[src*='lemon'],
-  .site-decor-item[src*='laurel'] {
+@media (max-width: 899.98px) {
+  .decor-item,
+  .site-decor-item {
     display: none !important;
-  }
-
-  .hero-title-fly,
-  .hero-title-fly-delay {
-    animation: none !important;
-    transform: none !important;
   }
 }

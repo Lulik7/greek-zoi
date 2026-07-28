@@ -29,9 +29,9 @@ export default function SearchBar({ initial = '' }: { initial?: string }) {
       sx={{
         p: { xs: 2, md: 3 },
         borderRadius: 4,
-        border: '1px solid rgba(33,25,95,0.1)',
+        border: '1px solid rgba(18,58,99,0.1)',
         bgcolor: '#ffffff',
-        boxShadow: '0 24px 60px -32px rgba(33,25,95,0.28)',
+        boxShadow: '0 24px 60px -32px rgba(18,58,99,0.28)',
       }}
       elevation={0}
     >

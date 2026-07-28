@@ -3,7 +3,6 @@ import { Route, Routes } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import HomePage from './pages/HomePage';
-import MapPage from './pages/MapPage';
 import CatalogPage from './pages/CatalogPage';
 import AllTracksPage from './pages/AllTracksPage';
 import SubscribePage from './pages/SubscribePage';
@@ -12,7 +11,6 @@ import AdminPage from './pages/admin/AdminPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import StatusBanners from './components/StatusBanners';
 import SiteDecor from './components/SiteDecor';
-import GreekMythCloud from './components/GreekMythCloud';
 import { useApp } from './store/AppContext';
 
 export default function App() {
@@ -58,7 +56,6 @@ export default function App() {
           <StatusBanners />
           <Routes>
             <Route path="/" element={<HomePage />} />
-            <Route path="/map" element={<MapPage />} />
             <Route path="/catalog" element={<CatalogPage />} />
             <Route path="/all" element={<AllTracksPage />} />
             <Route path="/subscribe" element={<SubscribePage />} />
@@ -69,8 +66,6 @@ export default function App() {
           </Routes>
         </Box>
         <Footer />
-        {/* внизу: герои мифов + факт/анекдот (не на /subscribe) */}
-        <GreekMythCloud />
       </Box>
     </Box>
   );

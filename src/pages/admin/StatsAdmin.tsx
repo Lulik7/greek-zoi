@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
 import {
-  Alert,
   Box,
   Card,
   CardContent,
@@ -55,7 +54,6 @@ export default function StatsAdmin() {
       searches: byType('search'),
       topPlays: count(() => true, 'play'),
       topSearches: count(() => true, 'search'),
-      topLocked: count(() => true, 'locked'),
       users: db.users.length,
       subscribers: db.users.filter((u) => u.subscription.active).length,
       paidCount: db.payments.filter((p) => p.status === 'paid').length,
@@ -86,24 +84,20 @@ export default function StatsAdmin() {
         <Stat label="Получено, €" value={data.revenue.toFixed(0)} />
       </Box>
 
-      <Alert severity="info">
-        Это внутренний счётчик демо-версии (события хранятся в браузере). На рабочем сайте
-        подключается внешняя аналитика — Google Analytics 4 или Plausible/Umami: там будут
-        источники трафика, устройства, города и воронка «зашёл → послушал → оплатил».
-      </Alert>
-
-      <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' } }}>
+      <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' } }}>
         {[
           { title: 'Чаще всего слушают', rows: data.topPlays },
           { title: 'Что ищут', rows: data.topSearches },
-          { title: 'Закрытые материалы, которые хотели открыть', rows: data.topLocked },
         ].map((block) => (
           <TableContainer key={block.title} component={Paper} variant="outlined">
             <Table size="small">
               <TableHead>
                 <TableRow>
-                  <TableCell>{block.title}</TableCell>
-                  <TableCell align="right">Раз</TableCell>
+                  {/* шапка в одну строку — заголовок не должен ломаться пополам */}
+                  <TableCell sx={{ whiteSpace: 'nowrap' }}>{block.title}</TableCell>
+                  <TableCell align="right" sx={{ whiteSpace: 'nowrap' }}>
+                    Кол-во
+                  </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>

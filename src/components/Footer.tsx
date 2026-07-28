@@ -1,8 +1,8 @@
 import { Box, Container, Divider, Link, Stack, Typography } from '@mui/material';
-import PhoneIcon from '@mui/icons-material/Phone';
+import FacebookIcon from '@mui/icons-material/Facebook';
 import EmailIcon from '@mui/icons-material/Email';
 import TelegramIcon from '@mui/icons-material/Telegram';
-import InstagramIcon from '@mui/icons-material/Instagram';
+import ChatIcon from '@mui/icons-material/Chat';
 import { useApp } from '../store/AppContext';
 import WaveEdge from './WaveEdge';
 import { PAGE_BG, YELLOW } from '../theme';
@@ -13,19 +13,27 @@ export default function Footer() {
   if (!s) return null;
 
   const items = [
-    { icon: <PhoneIcon fontSize="small" />, text: s.contactPhone, href: `tel:${s.contactPhone}` },
-    { icon: <EmailIcon fontSize="small" />, text: s.contactEmail, href: `mailto:${s.contactEmail}` },
+    {
+      icon: <FacebookIcon fontSize="small" />,
+      text: `FB: ${s.contactFacebook}`,
+      href: s.contactFacebookUrl,
+    },
+    {
+      icon: <EmailIcon fontSize="small" />,
+      text: `e-mail: ${s.contactEmail}`,
+      href: `mailto:${s.contactEmail}`,
+    },
     {
       icon: <TelegramIcon fontSize="small" />,
-      text: s.contactTelegram,
+      text: `Telegram: ${s.contactTelegram}`,
       href: `https://t.me/${s.contactTelegram.replace('@', '')}`,
     },
     {
-      icon: <InstagramIcon fontSize="small" />,
-      text: s.contactInstagram,
-      href: `https://instagram.com/${s.contactInstagram.replace('@', '')}`,
+      icon: <ChatIcon fontSize="small" />,
+      text: `Viber / WhatsApp: ${s.contactPhone}`,
+      href: `https://wa.me/${s.contactPhone.replace(/[^\d]/g, '')}`,
     },
-  ].filter((i) => i.text);
+  ].filter((i) => i.text && i.href);
 
   return (
     <Box
@@ -33,36 +41,28 @@ export default function Footer() {
       sx={{
         mt: { xs: 6, md: 10 },
         color: 'common.white',
-        background: 'linear-gradient(165deg, #7C7ACF 0%, #5F5BB8 50%, #21195F 100%)',
+        background: 'linear-gradient(165deg, #5B9BD5 0%, #3E7FB8 55%, #123A63 100%)',
       }}
     >
-      {/* волна сверху — такая же, как переход под шапкой и у блока о музыке */}
+      {/* волна сверху — такая же, как переход под первым блоком */}
       <WaveEdge color={PAGE_BG} flip />
       <Container maxWidth="lg" sx={{ py: { xs: 4, md: 6 }, textAlign: 'center' }}>
         <Typography
           component="div"
           sx={{
-            mb: 1,
+            mb: 2,
             fontWeight: 900,
             color: YELLOW,
-            textShadow: '0 2px 0 #21195F',
-            // в 3 раза крупнее обычного h6 (~1.25rem → ~3.75rem)
-            fontSize: { xs: '2.25rem', sm: '3rem', md: '3.75rem' },
-            lineHeight: 1.15,
+            textShadow: '0 2px 0 #123A63',
+            fontSize: { xs: '1.05rem', sm: '1.2rem', md: '1.35rem' },
+            lineHeight: 1.25,
           }}
         >
           {s.subtitle}
         </Typography>
         <Typography
           component="div"
-          sx={{
-            opacity: 0.9,
-            mb: 3,
-            fontWeight: 700,
-            // body2 (~0.875rem) × 3 ≈ 2.625rem
-            fontSize: { xs: '1.75rem', sm: '2.25rem', md: '2.625rem' },
-            lineHeight: 1.2,
-          }}
+          sx={{ opacity: 0.9, mb: 2, fontWeight: 700, fontSize: { xs: '1rem', md: '1.1rem' } }}
         >
           Контакты
         </Typography>

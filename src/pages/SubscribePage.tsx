@@ -20,7 +20,6 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import LockIcon from '@mui/icons-material/Lock';
 import { useApp } from '../store/AppContext';
 import AuthDialog from '../components/AuthDialog';
-import PrometheusFarewell from '../components/PrometheusFarewell';
 
 export default function SubscribePage() {
   const { db, user, isAdmin, hasSubscription, checkout, resendVerification, logEvent } = useApp();
@@ -67,9 +66,6 @@ export default function SubscribePage() {
 
   return (
     <Container maxWidth="lg" sx={{ py: { xs: 3, md: 5 } }}>
-      {/* 4-я страница меню: баннер Прометея на 10 с */}
-      <PrometheusFarewell authorEmail={db?.settings.contactEmail} />
-
       <Typography variant="h4" sx={{ fontSize: { xs: 26, md: 34 } }}>
         Подписка
       </Typography>

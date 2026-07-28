@@ -3,7 +3,7 @@ import { Box, Divider, IconButton, Stack, Switch, Tooltip, Typography } from '@m
 import AccessibilityNewIcon from '@mui/icons-material/AccessibilityNew';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
-import { HERO_VIOLET, INK, YELLOW } from '../theme';
+import { HERO_BLUE, INK, YELLOW } from '../theme';
 
 type Settings = {
   /** масштаб страницы: 1 — обычный, до 1.5 */
@@ -100,11 +100,11 @@ export default function AccessibilityPanel() {
             width: 52,
             height: 52,
             borderRadius: '14px 0 0 14px',
-            bgcolor: HERO_VIOLET,
+            bgcolor: HERO_BLUE,
             color: '#fff',
             border: `2px solid ${INK}`,
             borderRight: 'none',
-            boxShadow: '0 6px 18px rgba(33,25,95,0.3)',
+            boxShadow: '0 6px 18px rgba(18,58,99,0.3)',
             '&:hover': { bgcolor: YELLOW, color: INK },
           }}
         >
@@ -127,8 +127,8 @@ export default function AccessibilityPanel() {
             p: 2,
             borderRadius: 3,
             bgcolor: '#fff',
-            border: `3px solid ${HERO_VIOLET}`,
-            boxShadow: '0 18px 40px rgba(33,25,95,0.32)',
+            border: `3px solid ${HERO_BLUE}`,
+            boxShadow: '0 18px 40px rgba(18,58,99,0.32)',
           }}
         >
           <Stack

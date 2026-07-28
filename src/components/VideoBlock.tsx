@@ -44,15 +44,18 @@ export default function VideoBlock({ title, description, url, badge }: Props) {
           </Typography>
         )}
       </Box>
-      <CardContent>
-        {badge && <Chip size="small" color="secondary" label={badge} sx={{ mb: 1 }} />}
-        {title && <Typography variant="h6">{title}</Typography>}
-        {description && (
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-            {description}
-          </Typography>
-        )}
-      </CardContent>
+      {/* без подписи и описания карточку не раздуваем пустотой */}
+      {(badge || title || description) && (
+        <CardContent>
+          {badge && <Chip size="small" color="secondary" label={badge} sx={{ mb: 1 }} />}
+          {title && <Typography variant="h6">{title}</Typography>}
+          {description && (
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+              {description}
+            </Typography>
+          )}
+        </CardContent>
+      )}
     </Card>
   );
 }

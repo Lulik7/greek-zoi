@@ -1,27 +1,28 @@
 import { createTheme, alpha } from '@mui/material/styles';
 
 /**
- * Сайт: фиолетовый фон + hero и жёлтые акценты; декор по всему сайту.
+ * Сайт: спокойный голубой и белый, жёлтые акценты (лимоны).
  */
 export const UI_FONT = '"Nunito", "Segoe UI", system-ui, sans-serif';
 export const GREEK_FONT = UI_FONT;
 
-// hero (как в образце)
-export const HERO_VIOLET = '#7C7ACF';
-export const HERO_VIOLET_SOFT = '#6B68C0';
-export const SCENE_GROUND = '#EDE7F6';
-/** Бежевый фон всего сайта */
-export const PAGE_BG = '#F5E6D3';
-export const PAGE_BG_SOFT = '#EDE0C8';
+/** Спокойный голубой — шапка и первый блок */
+export const HERO_BLUE = '#5B9BD5';
+export const HERO_BLUE_SOFT = '#4A88C2';
+export const SCENE_GROUND = '#EAF3FB';
+/** Белый фон всего сайта */
+export const PAGE_BG = '#FFFFFF';
+export const PAGE_BG_SOFT = '#EAF3FB';
 export const YELLOW = '#FADA1B';
-export const INK = '#21195F';
+/** Тёмно-синий: текст и обводка заголовка */
+export const INK = '#123A63';
 /** Текст на светлом фоне */
 export const TEXT_ON_DARK = INK;
-export const TEXT_MUTED = '#6B6296';
+export const TEXT_MUTED = '#4B6A85';
 
-const violet = '#6B68C9';
-const violetDark = INK;
-const violetLight = '#9C99E8';
+const blue = '#3E7FB8';
+const blueDark = INK;
+const blueLight = '#8FC1E3';
 const yellow = YELLOW;
 const ink = INK;
 
@@ -49,12 +50,12 @@ export const pillButtonSx = {
 export const theme = createTheme({
   palette: {
     mode: 'light',
-    primary: { main: violet, dark: violetDark, light: violetLight, contrastText: '#fff' },
+    primary: { main: blue, dark: blueDark, light: blueLight, contrastText: '#fff' },
     secondary: { main: yellow, dark: '#E5C410', light: '#FFE56A', contrastText: ink },
     success: { main: '#1f9d63' },
     background: { default: PAGE_BG, paper: '#ffffff' },
     text: { primary: ink, secondary: TEXT_MUTED },
-    divider: 'rgba(33,25,95,0.12)',
+    divider: 'rgba(18,58,99,0.14)',
   },
   shape: { borderRadius: 22 },
   typography: {
@@ -103,7 +104,7 @@ export const theme = createTheme({
       defaultProps: { elevation: 0 },
       styleOverrides: {
         root: {
-          border: '1px solid rgba(33,25,95,0.1)',
+          border: '1px solid rgba(18,58,99,0.1)',
           borderRadius: 22,
           backgroundColor: '#ffffff',
           opacity: 1,
@@ -143,9 +144,9 @@ export const theme = createTheme({
         },
         outlined: {
           borderWidth: 2,
-          borderColor: 'rgba(33,25,95,0.22)',
+          borderColor: 'rgba(18,58,99,0.22)',
           color: ink,
-          '&:hover': { borderWidth: 2, borderColor: violet },
+          '&:hover': { borderWidth: 2, borderColor: blue },
         },
       },
     },
@@ -153,7 +154,7 @@ export const theme = createTheme({
       styleOverrides: {
         root: { fontWeight: 700, borderRadius: 999, fontSize: 14.5 },
         sizeSmall: { fontSize: 13.5, height: 26 },
-        outlined: { borderColor: 'rgba(33,25,95,0.2)', color: ink },
+        outlined: { borderColor: 'rgba(18,58,99,0.2)', color: ink },
       },
     },
     MuiAppBar: {
@@ -164,7 +165,8 @@ export const theme = createTheme({
     MuiTableCell: {
       styleOverrides: {
         root: { fontSize: 15 },
-        head: { fontWeight: 800, color: TEXT_MUTED, backgroundColor: '#5E35B1' },
+        // шапка таблицы синяя — подписи в ней только белые, иначе не читаются
+        head: { fontWeight: 800, color: '#FFFFFF', backgroundColor: '#3E7FB8' },
       },
     },
     MuiListItemText: { styleOverrides: { primary: { fontSize: 16 } } },

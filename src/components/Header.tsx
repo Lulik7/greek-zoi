@@ -20,19 +20,16 @@ import {
   Typography,
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
-import FormatQuoteIcon from '@mui/icons-material/FormatQuote';
 import LogoutIcon from '@mui/icons-material/Logout';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import WorkspacePremiumIcon from '@mui/icons-material/WorkspacePremium';
 import { useApp } from '../store/AppContext';
 import AuthDialog from './AuthDialog';
-import { GREEK_FONT, HERO_VIOLET, INK, YELLOW } from '../theme';
+import { GREEK_FONT, HERO_BLUE, INK, YELLOW } from '../theme';
 
-const NAV: { to: string; label: string; sub?: string }[] = [
+const NAV: { to: string; label: string }[] = [
   { to: '/', label: 'Главная' },
-  { to: '/map', label: 'Карта сайта', sub: '(игры)' },
   { to: '/catalog', label: 'Каталог' },
-  { to: '/all', label: 'Все материалы' },
   { to: '/subscribe', label: 'Подписка' },
 ];
 
@@ -48,11 +45,43 @@ export default function Header() {
   const [anchor, setAnchor] = useState<null | HTMLElement>(null);
   const [drawer, setDrawer] = useState(false);
   const s = db?.settings;
+  const levels = db?.levels ?? [];
 
   const goto = (to: string) => {
     setDrawer(false);
     nav(to);
   };
+
+  /** Один и тот же ряд этикеток: в шапке на компьютере и под ней на телефоне */
+  const levelChips = (
+    <Stack
+      direction="row"
+      spacing={{ xs: 0.75, sm: 1 }}
+      useFlexGap
+      sx={{ alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}
+    >
+      {levels.map((l) => (
+        <Chip
+          key={l.id}
+          component={RouterLink}
+          to={`/catalog?level=${l.id}`}
+          clickable
+          label={l.code}
+          sx={{
+            fontFamily: GREEK_FONT,
+            fontWeight: 900,
+            fontSize: { xs: 15, sm: 16 },
+            height: { xs: 30, sm: 34 },
+            px: { xs: 0.5, sm: 0.75 },
+            bgcolor: YELLOW,
+            color: INK,
+            border: `2px solid ${INK}`,
+            '&:hover': { bgcolor: '#FFE056' },
+          }}
+        />
+      ))}
+    </Stack>
+  );
 
   return (
     <>
@@ -61,7 +90,7 @@ export default function Header() {
         color="inherit"
         elevation={0}
         sx={{
-          bgcolor: HERO_VIOLET,
+          bgcolor: HERO_BLUE,
           color: 'common.white',
           boxShadow: 'none !important',
           border: 'none !important',
@@ -80,90 +109,23 @@ export default function Header() {
       >
         <Container maxWidth="xl">
           <Toolbar disableGutters sx={{ gap: 1, py: 1, minHeight: { xs: 64, md: 80 } }}>
-            {/* В самой верхней полосе — цитата на греческом и её перевод */}
             {/*
-              На телефоне цитата с переводом занимает почти всю строку и
-              жмёт кнопки — там её не показываем. Вместо неё пустая распорка,
-              иначе «Войти» и бургер уедут к левому краю.
+              Этикетки уровней. На широком экране стоят в свободном месте
+              между краем и меню — по центру этого промежутка. На телефоне
+              меню прячется в бургер, поэтому там этикетки уезжают в
+              отдельный ряд под шапкой и стоят ровно по центру экрана.
             */}
-            <Box sx={{ display: { xs: 'block', sm: 'none' }, flexGrow: 1 }} />
             <Box
-              component={RouterLink}
-              to="/"
               sx={{
                 flexGrow: 1,
                 minWidth: 0,
-                textDecoration: { xs: 'none', sm: 'none' },
-                display: { xs: 'none', sm: 'flex' },
-                alignItems: 'center',
-                gap: 1.5,
+                display: { xs: 'none', md: 'flex' },
+                justifyContent: 'center',
               }}
             >
-              <FormatQuoteIcon
-                sx={{
-                  color: 'secondary.main',
-                  fontSize: 26,
-                  flexShrink: 0,
-                  display: { xs: 'none', sm: 'block' },
-                  transform: 'scaleX(-1)',
-                }}
-              />
-              <Box sx={{ minWidth: 0, flex: 1 }}>
-                <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center', minWidth: 0 }}>
-                  <Typography
-                    sx={{
-                      fontFamily: GREEK_FONT,
-                      fontStyle: 'italic',
-                      fontWeight: 700,
-                      fontSize: { sm: 17, md: 19, lg: 21 },
-                      lineHeight: 1.25,
-                      color: 'secondary.main',
-                      minWidth: 0,
-                      /*
-                       * На планшете строка не помещается и обрывалась многоточием.
-                       * Разрешаем ей занять две строки; на широком экране —
-                       * по-прежнему одна.
-                       */
-                      display: { sm: '-webkit-box', lg: 'block' },
-                      WebkitBoxOrient: 'vertical',
-                      WebkitLineClamp: { sm: 2, lg: 'unset' },
-                      overflow: 'hidden',
-                      whiteSpace: { sm: 'normal', lg: 'nowrap' },
-                      textOverflow: 'ellipsis',
-                    }}
-                  >
-                    {s?.heroQuoteEl}
-                  </Typography>
-                  <FormatQuoteIcon
-                    sx={{
-                      color: 'secondary.main',
-                      fontSize: 26,
-                      flexShrink: 0,
-                      display: { xs: 'none', sm: 'block' },
-                    }}
-                  />
-                </Stack>
-                <Typography
-                  variant="caption"
-                  component="div"
-                  sx={{
-                    color: 'rgba(255,255,255,.85)',
-                    letterSpacing: '0.02em',
-                    lineHeight: 1.3,
-                    // то же правило, что и для греческой строки выше
-                    display: { sm: '-webkit-box', lg: 'block' },
-                    WebkitBoxOrient: 'vertical',
-                    WebkitLineClamp: { sm: 2, lg: 'unset' },
-                    overflow: 'hidden',
-                    whiteSpace: { sm: 'normal', lg: 'nowrap' },
-                    textOverflow: 'ellipsis',
-                  }}
-                >
-                  {s?.heroQuoteRu}
-                  {s?.heroQuoteSource ? ` · ${s.heroQuoteSource}` : ''}
-                </Typography>
-              </Box>
+              {levelChips}
             </Box>
+            <Box sx={{ flexGrow: 1, display: { xs: 'block', md: 'none' } }} />
 
             <Stack
               direction="row"
@@ -177,7 +139,6 @@ export default function Header() {
                   to={n.to}
                   color="inherit"
                   sx={{
-                    position: 'relative',
                     px: 1.75,
                     color: 'common.white',
                     fontWeight: 800,
@@ -188,31 +149,6 @@ export default function Header() {
                   }}
                 >
                   {n.label}
-                  {/*
-                    Вторая строка вынесена из потока: иначе она растягивала кнопку
-                    и пункт вставал выше соседних. Так все названия на одном уровне.
-                  */}
-                  {n.sub && (
-                    <Box
-                      component="span"
-                      sx={{
-                        position: 'absolute',
-                        top: '78%',
-                        left: 0,
-                        right: 0,
-                        textAlign: 'center',
-                        pointerEvents: 'none',
-                        fontSize: 14,
-                        fontWeight: 900,
-                        lineHeight: 1,
-                        letterSpacing: '0.02em',
-                        color: 'secondary.main',
-                        textTransform: 'lowercase',
-                      }}
-                    >
-                      {n.sub}
-                    </Box>
-                  )}
                 </Button>
               ))}
             </Stack>
@@ -324,12 +260,23 @@ export default function Header() {
 
             <IconButton
               aria-label="Меню"
-              sx={{ display: { xs: 'inline-flex', md: 'none' } }}
+              sx={{ display: { xs: 'inline-flex', md: 'none' }, color: 'common.white' }}
               onClick={() => setDrawer(true)}
             >
               <MenuIcon />
             </IconButton>
           </Toolbar>
+
+          {/* телефон и планшет: этикетки уровней отдельным рядом, по центру */}
+          <Box
+            sx={{
+              display: { xs: 'flex', md: 'none' },
+              justifyContent: 'center',
+              pb: 1.25,
+            }}
+          >
+            {levelChips}
+          </Box>
         </Container>
       </AppBar>
 
@@ -344,7 +291,7 @@ export default function Header() {
           <List>
             {NAV.map((n) => (
               <ListItemButton key={n.to} onClick={() => goto(n.to)}>
-                <ListItemText primary={n.label} secondary={n.sub} />
+                <ListItemText primary={n.label} />
               </ListItemButton>
             ))}
             {user && (

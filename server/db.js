@@ -517,6 +517,62 @@ function migrate() {
       if (changed.changes) console.log(`[db] почта администратора изменена на ${wanted}`);
     }
   }
+
+  // Уровней теперь четыре: A1, A2, B1, B2. Материалы уровней Γ1/Γ2
+  // переводим на B2, иначе они пропали бы из каталога.
+  const extra = db.prepare("SELECT id FROM levels WHERE id IN ('g1','g2')").all();
+  if (extra.length) {
+    db.prepare("UPDATE OR IGNORE track_levels SET level_id = 'b2' WHERE level_id IN ('g1','g2')").run();
+    db.prepare("DELETE FROM track_levels WHERE level_id IN ('g1','g2')").run();
+    db.prepare("DELETE FROM levels WHERE id IN ('g1','g2')").run();
+    console.log('[db] уровни Γ1 и Γ2 убраны, их материалы отнесены к B2');
+  }
+
+  /*
+   * Контакты школы и настройки шапки. Меняем только те значения, которые
+   * остались демонстрационными: если школа уже правила их через админку,
+   * трогать нельзя.
+   */
+  const stored = db.prepare("SELECT value FROM settings WHERE key = 'site'").get();
+  if (stored) {
+    const s = JSON.parse(stored.value);
+    const wasDemo = {
+      contactPhone: '+30 690 000 0000',
+      contactEmail: 'info@greek-zoi.com',
+      contactTelegram: '@greek_zoi',
+    };
+    let touched = false;
+    for (const [key, demo] of Object.entries(wasDemo)) {
+      if (s[key] === demo) {
+        s[key] = SETTINGS[key];
+        touched = true;
+      }
+    }
+    // цитата, Instagram, фото первого блока и заголовок сменного видео убраны
+    for (const key of [
+      'heroQuoteEl',
+      'heroQuoteRu',
+      'heroQuoteSource',
+      'contactInstagram',
+      'featuredVideoTitle',
+      'heroImageUrl',
+      'heroVideoUrl',
+    ]) {
+      if (key in s) {
+        delete s[key];
+        touched = true;
+      }
+    }
+    if (!s.contactFacebook) {
+      s.contactFacebook = SETTINGS.contactFacebook;
+      s.contactFacebookUrl = SETTINGS.contactFacebookUrl;
+      touched = true;
+    }
+    if (touched) {
+      db.prepare("UPDATE settings SET value = ? WHERE key = 'site'").run(JSON.stringify(s));
+      console.log('[db] настройки сайта обновлены: контакты школы, цитата убрана');
+    }
+  }
 }
 
 seedIfEmpty();

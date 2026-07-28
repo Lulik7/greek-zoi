@@ -14,8 +14,6 @@ export const LEVELS = [
   { id: 'a2', code: 'A2', title: 'Α2 — Базовый', description: 'Быт, покупки, простые фразы', order: 2 },
   { id: 'b1', code: 'B1', title: 'Β1 — Средний', description: 'Свободный разговор на бытовые темы', order: 3 },
   { id: 'b2', code: 'B2', title: 'Β2 — Выше среднего', description: 'Мнение, аргументы, тексты песен', order: 4 },
-  { id: 'g1', code: 'Γ1', title: 'Γ1 — Продвинутый', description: 'Идиомы, разговорная речь, поэзия', order: 5 },
-  { id: 'g2', code: 'Γ2', title: 'Γ2 — Владение', description: 'Литературный и профессиональный греческий', order: 6 },
 ];
 
 export const TOPICS = [
@@ -154,7 +152,7 @@ export const TRACKS = [
     titleRu: 'Собеседование на работу',
     artist: 'Ζωή & εργοδότης',
     kind: 'dialogue',
-    levelIds: ['b2', 'g1'],
+    levelIds: ['b2'],
     topicIds: ['work'],
     audioUrl: DEMO[2],
     free: false,
@@ -170,7 +168,7 @@ export const TRACKS = [
     titleRu: 'Слова любви',
     artist: 'Демо-запись школы',
     kind: 'song',
-    levelIds: ['g1', 'g2'],
+    levelIds: ['b2'],
     topicIds: ['love'],
     audioUrl: DEMO[3],
     free: false,
@@ -203,19 +201,14 @@ export const TRACKS = [
 export const SETTINGS = {
   title: 'СЛУШАЮ ГРЕЧЕСКИЙ — ГОВОРЮ ПО-ГРЕЧЕСКИ',
   subtitle: 'Онлайн-школа греческого языка Зои Павловской',
-  heroQuoteEl: 'Όποιος τραγουδάει, τα βάσανά του ξεχνάει.',
-  heroQuoteRu: 'Кто поёт — забывает свои печали',
-  heroQuoteSource: 'греческая народная мудрость',
-  heroImageUrl: '/media/hero-greek2.jpg',
-  heroVideoUrl: '/media/hero-athlete.mp4',
-  contactPhone: '+30 690 000 0000',
-  contactEmail: 'info@greek-zoi.com',
-  contactTelegram: '@greek_zoi',
-  contactInstagram: '@greek.with.zoi',
+  contactPhone: '+306982104110',
+  contactEmail: 'zoepavlovska@gmail.com',
+  contactTelegram: '@zoiapavlovska',
+  contactFacebook: 'Zoi Pavlovska',
+  contactFacebookUrl: 'https://www.facebook.com/sinnefokapnou',
   instructionVideoUrl: 'https://www.youtube.com/embed/jNQXAC9IVRw',
   instructionVideoTitle: 'Как пользоваться сайтом',
   featuredVideoUrl: 'https://www.youtube.com/embed/aqz-KE-bpKQ',
-  featuredVideoTitle: 'Песня месяца',
   featuredVideoDescription: '',
   plans: [
     {

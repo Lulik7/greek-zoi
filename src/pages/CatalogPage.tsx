@@ -1,8 +1,7 @@
-import { useEffect, useMemo, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useEffect, useMemo } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Alert,
-  Box,
   Chip,
   Container,
   Divider,
@@ -12,17 +11,14 @@ import {
 } from '@mui/material';
 import { useApp } from '../store/AppContext';
 import SearchBar from '../components/SearchBar';
-import FunFrame from '../components/FunFrame';
 import TrackCard from '../components/TrackCard';
-import LockedDialog from '../components/LockedDialog';
 import { filterTracks, interpretQuery } from '../lib/search';
-import type { Track } from '../types';
-import { HERO_VIOLET, INK, YELLOW } from '../theme';
+import { HERO_BLUE, INK, YELLOW } from '../theme';
 
 export default function CatalogPage() {
   const { db, logEvent } = useApp();
+  const nav = useNavigate();
   const [params, setParams] = useSearchParams();
-  const [locked, setLocked] = useState<Track | null>(null);
 
   const q = params.get('q') ?? '';
   const levelParam = params.get('level');
@@ -53,7 +49,9 @@ export default function CatalogPage() {
   const results = useMemo(() => {
     if (!db) return [];
     if (trackParam) return db.tracks.filter((t) => t.id === trackParam);
-    return filterTracks(db.tracks, { levelIds, topicIds, text: intent?.text });
+    const found = filterTracks(db.tracks, { levelIds, topicIds, text: intent?.text });
+    // бесплатное всегда первым: с него удобно начать знакомство со школой
+    return [...found].sort((a, b) => Number(b.free) - Number(a.free));
   }, [db, levelIds, topicIds, intent, trackParam]);
 
   if (!db) return null;
@@ -72,32 +70,6 @@ export default function CatalogPage() {
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
       <Stack spacing={3}>
-        {/* древнегреческая нотация — картинка со свободной лицензией с Викисклада */}
-        <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-          <FunFrame
-            caption="Древнегреческая нотация: знаки для голоса и для инструмента"
-            onLight
-            tilt={-2}
-            aspect="756 / 317"
-            width={{ xs: 320, sm: 520, md: 700 }}
-          >
-            <Box
-              component="img"
-              src="/decor/greek-notation.png"
-              alt="Таблица древнегреческой музыкальной нотации"
-              loading="lazy"
-              sx={{
-                position: 'absolute',
-                inset: 0,
-                width: '100%',
-                height: '100%',
-                objectFit: 'contain',
-                display: 'block',
-              }}
-            />
-          </FunFrame>
-        </Box>
-
         <SearchBar initial={q} />
 
         {/* Уровни и темы — с заливкой, чтобы выделялись на сиреневом фоне */}
@@ -108,8 +80,8 @@ export default function CatalogPage() {
               p: { xs: 2, sm: 2.5 },
               borderRadius: 3,
               bgcolor: '#ffffff',
-              border: '1px solid rgba(33,25,95,0.1)',
-              boxShadow: '0 8px 28px -18px rgba(33,25,95,0.35)',
+              border: '1px solid rgba(18,58,99,0.1)',
+              boxShadow: '0 8px 28px -18px rgba(18,58,99,0.35)',
             }}
           >
             <Typography
@@ -142,11 +114,11 @@ export default function CatalogPage() {
                       flex: { xs: '1 1 0', sm: '0 0 auto' },
                       minWidth: 0,
                       '& .MuiChip-label': { px: { xs: 0.75, sm: 1.5 } },
-                      bgcolor: on ? HERO_VIOLET : 'rgba(124,122,207,0.12)',
+                      bgcolor: on ? HERO_BLUE : 'rgba(91,155,213,0.12)',
                       color: on ? '#fff' : INK,
-                      border: on ? 'none' : '1px solid rgba(124,122,207,0.35)',
+                      border: on ? 'none' : '1px solid rgba(91,155,213,0.35)',
                       '&:hover': {
-                        bgcolor: on ? '#6B68C0' : 'rgba(124,122,207,0.22)',
+                        bgcolor: on ? '#6B68C0' : 'rgba(91,155,213,0.22)',
                       },
                     }}
                   />
@@ -161,8 +133,8 @@ export default function CatalogPage() {
               p: { xs: 2, sm: 2.5 },
               borderRadius: 3,
               bgcolor: '#ffffff',
-              border: '1px solid rgba(33,25,95,0.1)',
-              boxShadow: '0 8px 28px -18px rgba(33,25,95,0.35)',
+              border: '1px solid rgba(18,58,99,0.1)',
+              boxShadow: '0 8px 28px -18px rgba(18,58,99,0.35)',
             }}
           >
             <Typography
@@ -184,7 +156,7 @@ export default function CatalogPage() {
                       fontWeight: 700,
                       bgcolor: on ? YELLOW : 'rgba(250,218,27,0.18)',
                       color: INK,
-                      border: on ? '1px solid rgba(33,25,95,0.2)' : '1px solid rgba(250,218,27,0.45)',
+                      border: on ? '1px solid rgba(18,58,99,0.2)' : '1px solid rgba(250,218,27,0.45)',
                       '&:hover': {
                         bgcolor: on ? '#FFE056' : 'rgba(250,218,27,0.32)',
                       },
@@ -230,14 +202,13 @@ export default function CatalogPage() {
               track={t}
               levels={db.levels}
               topics={db.topics}
-              onLocked={setLocked}
+              // закрытый материал — сразу страница с условиями подписки
+              onLocked={() => nav('/subscribe')}
               defaultOpen={!!trackParam}
             />
           ))}
         </Stack>
       </Stack>
-
-      <LockedDialog track={locked} onClose={() => setLocked(null)} />
     </Container>
   );
 }
