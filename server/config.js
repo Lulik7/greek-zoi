@@ -99,8 +99,24 @@ export const config = {
     user: process.env.SMTP_USER || '',
     pass: process.env.SMTP_PASS || '',
     from: process.env.MAIL_FROM || 'Школа греческого языка <no-reply@localhost>',
+    /*
+     * Многие хостинги (в том числе Render) закрывают исходящие SMTP-порты,
+     * чтобы с их серверов не рассылали спам. Тогда письма отправляют через
+     * обычный веб-запрос к почтовому сервису — он не блокируется.
+     * Достаточно заполнить один из ключей; SMTP остаётся для своего сервера.
+     */
+    // пробелы и переносы строк по краям — обычная беда при копировании ключа
+    resendKey: (process.env.RESEND_API_KEY || '').trim(),
+    brevoKey: (process.env.BREVO_API_KEY || '').trim(),
+    /** Каким способом отправляем: что заполнено, то и используется */
+    get provider() {
+      if (this.resendKey) return 'resend';
+      if (this.brevoKey) return 'brevo';
+      if (this.host) return 'smtp';
+      return 'none';
+    },
     get enabled() {
-      return !!this.host;
+      return this.provider !== 'none';
     },
   },
 

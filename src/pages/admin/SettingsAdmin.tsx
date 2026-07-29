@@ -157,8 +157,12 @@ export default function SettingsAdmin() {
               {mailBusy ? 'Отправляю…' : 'Отправить пробное письмо'}
             </Button>
           </Stack>
+          {/* ответ сервиса приходит второй строкой — переносы не съедаем */}
           {mailResult && (
-            <Alert severity={mailResult.ok ? 'success' : 'error'} sx={{ mt: 2 }}>
+            <Alert
+              severity={mailResult.ok ? 'success' : 'error'}
+              sx={{ mt: 2, whiteSpace: 'pre-line' }}
+            >
               {mailResult.text}
             </Alert>
           )}

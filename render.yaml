@@ -36,6 +36,13 @@ services:
         sync: false
 
       # --- Почта: значения вводятся в панели Render, в файл не попадают ---
+      # Render закрывает исходящие SMTP-порты, поэтому письма уходят через
+      # почтовый сервис обычным веб-запросом. Заполняется один ключ из двух.
+      - key: RESEND_API_KEY
+        sync: false
+      - key: BREVO_API_KEY
+        sync: false
+      # SMTP остаётся на случай переезда на свой сервер, где порты открыты
       - key: SMTP_HOST
         sync: false
       - key: SMTP_PORT

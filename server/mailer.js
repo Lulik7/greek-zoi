@@ -61,10 +61,95 @@ function layout(title, body, action) {
 </body></html>`;
 }
 
+/** «Имя <адрес>» → { name, email }. Нужно сервисам, которые хотят их врозь. */
+function parseFrom(value) {
+  const m = String(value).match(/^\s*(.*?)\s*<\s*([^>]+)\s*>\s*$/);
+  if (m) return { name: m[1].replace(/^"|"$/g, ''), email: m[2] };
+  return { name: '', email: String(value).trim() };
+}
+
+/**
+ * Ошибка отправки с кодом — по коду роут проверки почты подбирает
+ * человеческое объяснение.
+ */
+function mailError(message, code) {
+  const e = new Error(message);
+  e.code = code;
+  return e;
+}
+
+/**
+ * Ключ уезжает в заголовок запроса, а туда можно только латиницу и цифры.
+ * Если в него затесались кириллица или пробел, лучше сказать об этом прямо,
+ * чем показывать ошибку кодировки из недр браузерного API.
+ */
+function checkKey(key, where) {
+  if (!/^[\x20-\x7E]+$/.test(key)) {
+    throw mailError(
+      `Ключ ${where} содержит посторонние символы — похоже, скопировался не целиком ` +
+        'или вместе с лишним текстом. Скопируйте его заново.',
+      'EAUTH',
+    );
+  }
+}
+
+/** Resend: письмо уходит обычным веб-запросом, SMTP-порты не нужны */
+async function sendViaResend({ to, subject, html, text }) {
+  checkKey(config.mail.resendKey, 'RESEND_API_KEY');
+  const res = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${config.mail.resendKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ from: config.mail.from, to: [to], subject, html, text }),
+    signal: AbortSignal.timeout(20_000),
+  });
+  if (res.ok) return { delivered: true };
+
+  const body = await res.text();
+  if (res.status === 401 || res.status === 403) {
+    throw mailError(`Resend не принял ключ: ${body}`, 'EAUTH');
+  }
+  if (res.status === 422 || res.status === 400) {
+    throw mailError(`Resend отклонил письмо: ${body}`, 'EFROM');
+  }
+  throw mailError(`Resend ответил ошибкой ${res.status}: ${body}`, 'EPROVIDER');
+}
+
+/** Brevo: то же самое, но адрес отправителя подтверждается по одному, без домена */
+async function sendViaBrevo({ to, subject, html, text }) {
+  checkKey(config.mail.brevoKey, 'BREVO_API_KEY');
+  const from = parseFrom(config.mail.from);
+  const res = await fetch('https://api.brevo.com/v3/smtp/email', {
+    method: 'POST',
+    headers: { 'api-key': config.mail.brevoKey, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      sender: from.name ? { email: from.email, name: from.name } : { email: from.email },
+      to: [{ email: to }],
+      subject,
+      htmlContent: html,
+      textContent: text,
+    }),
+    signal: AbortSignal.timeout(20_000),
+  });
+  if (res.ok) return { delivered: true };
+
+  const body = await res.text();
+  if (res.status === 401) throw mailError(`Brevo не принял ключ: ${body}`, 'EAUTH');
+  if (res.status === 400) throw mailError(`Brevo отклонил письмо: ${body}`, 'EFROM');
+  throw mailError(`Brevo ответил ошибкой ${res.status}: ${body}`, 'EPROVIDER');
+}
+
 async function send({ to, subject, html, text }) {
+  const { provider } = config.mail;
+
+  if (provider === 'resend') return sendViaResend({ to, subject, html, text });
+  if (provider === 'brevo') return sendViaBrevo({ to, subject, html, text });
+
   const t = getTransport();
   if (!t) {
-    console.log(`\n[mail] SMTP не настроен, письмо не отправлено.\n  кому: ${to}\n  тема: ${subject}\n  ${text}\n`);
+    console.log(`\n[mail] почта не настроена, письмо не отправлено.\n  кому: ${to}\n  тема: ${subject}\n  ${text}\n`);
     return { delivered: false };
   }
   await t.sendMail({ from: config.mail.from, to, subject, html, text });
@@ -116,14 +201,13 @@ export async function sendPasswordReset(user, token) {
  * что именно не так с настройками почты.
  */
 export async function sendTest(to) {
-  const t = getTransport();
-  if (!t) {
-    const e = new Error('Почта не настроена: не заполнена переменная SMTP_HOST');
-    e.code = 'NOSMTP';
-    throw e;
+  if (!config.mail.enabled) {
+    throw mailError(
+      'Почта не настроена: не заполнен ни ключ почтового сервиса, ни SMTP_HOST',
+      'NOSMTP',
+    );
   }
-  await t.sendMail({
-    from: config.mail.from,
+  await send({
     to,
     subject: 'Проверка почты — школа греческого языка',
     text: 'Это пробное письмо с сайта школы. Если вы его видите, почта настроена верно.',
@@ -133,7 +217,7 @@ export async function sendTest(to) {
         'значит ученики будут получать подтверждение адреса и восстановление пароля.',
     ),
   });
-  return { delivered: true };
+  return { delivered: true, provider: config.mail.provider };
 }
 
 export async function sendSubscriptionStarted(user, plan, until) {
