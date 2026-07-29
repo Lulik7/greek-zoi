@@ -95,6 +95,10 @@ export const api = {
     });
   },
 
+  /** Пробное письмо из админки: проверяет настройки почты и показывает причину сбоя */
+  testMail: (to: string) =>
+    request<{ ok: true; to: string; ms: number }>('/api/admin/mail-test', json('POST', { to })),
+
   // ---------- перенос и резервная копия ----------
   /** Скачивает выгрузку содержимого сайта файлом */
   exportContent: async () => {

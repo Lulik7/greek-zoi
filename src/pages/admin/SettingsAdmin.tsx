@@ -5,6 +5,7 @@ import {
   Button,
   Card,
   CardContent,
+  CircularProgress,
   IconButton,
   Stack,
   TextField,
@@ -13,18 +14,47 @@ import {
 import SaveIcon from '@mui/icons-material/Save';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
+import SendIcon from '@mui/icons-material/Send';
+import { api } from '../../api/client';
 import { useApp } from '../../store/AppContext';
 import type { SiteSettings } from '../../types';
 import VideoBlock from '../../components/VideoBlock';
 
 export default function SettingsAdmin() {
-  const { db, saveSettings } = useApp();
+  const { db, user, saveSettings } = useApp();
   const [s, setS] = useState<SiteSettings | null>(null);
   const [msg, setMsg] = useState('');
+  const [mailTo, setMailTo] = useState('');
+  const [mailBusy, setMailBusy] = useState(false);
+  const [mailResult, setMailResult] = useState<{ ok: boolean; text: string } | null>(null);
 
   useEffect(() => {
     if (db) setS(db.settings);
   }, [db]);
+
+  // по умолчанию проверяем на почту администратора — её точно видно
+  useEffect(() => {
+    if (user?.email) setMailTo((prev) => prev || user.email);
+  }, [user]);
+
+  const testMail = async () => {
+    setMailBusy(true);
+    setMailResult(null);
+    try {
+      const res = await api.testMail(mailTo);
+      setMailResult({
+        ok: true,
+        text: `Письмо отправлено на ${res.to}. Проверьте почту, загляните и в «Спам».`,
+      });
+    } catch (e) {
+      setMailResult({
+        ok: false,
+        text: e instanceof Error ? e.message : 'Письмо не отправилось',
+      });
+    } finally {
+      setMailBusy(false);
+    }
+  };
 
   if (!s) return null;
 
@@ -96,6 +126,42 @@ export default function SettingsAdmin() {
               helperText="Сюда же ведёт жёлтая надпись с названием школы на главной"
             />
           </Stack>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardContent>
+          <Typography variant="h6" sx={{ mb: 0.5 }}>
+            Проверка почты
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            Сайт отправляет ученикам подтверждение адреса и восстановление пароля.
+            Нажмите кнопку — придёт пробное письмо. Если что-то не так, здесь же
+            появится причина.
+          </Typography>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ alignItems: 'center' }}>
+            <TextField
+              label="Кому отправить"
+              value={mailTo}
+              onChange={(e) => setMailTo(e.target.value)}
+              fullWidth
+              placeholder="ваша почта"
+            />
+            <Button
+              variant="outlined"
+              startIcon={mailBusy ? <CircularProgress size={18} /> : <SendIcon />}
+              onClick={testMail}
+              disabled={mailBusy}
+              sx={{ whiteSpace: 'nowrap', width: { xs: '100%', sm: 'auto' } }}
+            >
+              {mailBusy ? 'Отправляю…' : 'Отправить пробное письмо'}
+            </Button>
+          </Stack>
+          {mailResult && (
+            <Alert severity={mailResult.ok ? 'success' : 'error'} sx={{ mt: 2 }}>
+              {mailResult.text}
+            </Alert>
+          )}
         </CardContent>
       </Card>
 

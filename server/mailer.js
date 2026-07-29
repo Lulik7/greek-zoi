@@ -18,6 +18,14 @@ function getTransport() {
       port: config.mail.port,
       secure: config.mail.port === 465,
       auth: config.mail.user ? { user: config.mail.user, pass: config.mail.pass } : undefined,
+      /*
+       * Таймауты покороче стандартных двух минут: если хостинг закрывает
+       * исходящий SMTP, соединение просто висит, и регистрация вместе с ним.
+       * Лучше быстро сказать «не получилось», чем держать человека у экрана.
+       */
+      connectionTimeout: 15_000,
+      greetingTimeout: 10_000,
+      socketTimeout: 20_000,
     });
   }
   return transport;
@@ -101,6 +109,31 @@ export async function sendPasswordReset(user, token) {
     ),
   });
   return { ...res, url };
+}
+
+/**
+ * Пробное письмо из админки. Ошибку наверх не глушим — по ней видно,
+ * что именно не так с настройками почты.
+ */
+export async function sendTest(to) {
+  const t = getTransport();
+  if (!t) {
+    const e = new Error('Почта не настроена: не заполнена переменная SMTP_HOST');
+    e.code = 'NOSMTP';
+    throw e;
+  }
+  await t.sendMail({
+    from: config.mail.from,
+    to,
+    subject: 'Проверка почты — школа греческого языка',
+    text: 'Это пробное письмо с сайта школы. Если вы его видите, почта настроена верно.',
+    html: layout(
+      'Почта работает',
+      'Это пробное письмо, отправленное из админки. Если вы его видите, ' +
+        'значит ученики будут получать подтверждение адреса и восстановление пароля.',
+    ),
+  });
+  return { delivered: true };
 }
 
 export async function sendSubscriptionStarted(user, plan, until) {

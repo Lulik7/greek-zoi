@@ -16,7 +16,7 @@ import { dirname, extname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { config, isProduction, paths } from './config.js';
 import * as store from './db.js';
-import { sendPasswordReset, sendVerification } from './mailer.js';
+import { sendPasswordReset, sendTest, sendVerification } from './mailer.js';
 import { createCheckoutSession, fulfillCheckout, parseWebhook, stripeEnabled } from './payments.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -399,6 +399,47 @@ app.put('/api/admin/topics', requireAdmin, (req, res) => {
 
 app.put('/api/admin/settings', requireAdmin, (req, res) => {
   res.json(store.setSettings(req.body ?? {}));
+});
+
+/**
+ * Пробное письмо. Нужно, чтобы владелица сайта видела причину прямо на экране,
+ * а не искала её в логах хостинга. Типовые ошибки переводим на человеческий.
+ */
+app.post('/api/admin/mail-test', requireAdmin, async (req, res) => {
+  const to = String(req.body?.to ?? '').trim() || req.user.email;
+  if (!emailOk(to)) return res.status(400).json({ error: 'Введите корректный адрес почты' });
+
+  const started = Date.now();
+  try {
+    await sendTest(to);
+    res.json({ ok: true, to, ms: Date.now() - started });
+  } catch (e) {
+    const hints = {
+      NOSMTP: 'Не заполнены настройки почты: переменная SMTP_HOST пустая.',
+      EAUTH:
+        'Почтовый сервер не принял логин и пароль. Для Gmail нужен «пароль приложения» ' +
+        '(16 букв), а не обычный пароль от почты, и включённая двухэтапная аутентификация.',
+      ETIMEDOUT:
+        'Хостинг не пропускает исходящие письма: соединение с почтовым сервером не ' +
+        'установилось. Многие хостинги закрывают SMTP-порты от рассылки спама — тогда ' +
+        'вместо Gmail подключают почтовый сервис, который работает не через SMTP.',
+      ECONNECTION:
+        'Не удалось соединиться с почтовым сервером. Проверьте адрес сервера и порт — ' +
+        'либо хостинг закрывает исходящие письма.',
+      ECONNREFUSED: 'Почтовый сервер отказал в соединении: проверьте адрес сервера и порт.',
+      EDNS: 'Не найден адрес почтового сервера — проверьте, что в SMTP_HOST нет опечатки.',
+      ESOCKET: 'Соединение с почтовым сервером оборвалось. Обычно виноват неверный порт.',
+      EENVELOPE: 'Почтовый сервер не принял адрес отправителя или получателя.',
+    };
+    const hint = hints[e.code] ?? '';
+    console.warn('[mail] пробное письмо не ушло:', e.code, e.message);
+    res.status(400).json({
+      error: hint || 'Письмо не отправилось.',
+      code: e.code ?? '',
+      details: e.message,
+      ms: Date.now() - started,
+    });
+  }
 });
 
 /** Выгрузка содержимого сайта файлом — резервная копия и перенос на другой сервер */
