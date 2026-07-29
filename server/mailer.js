@@ -108,6 +108,14 @@ async function sendViaResend({ to, subject, html, text }) {
   if (res.ok) return { delivered: true };
 
   const body = await res.text();
+  /*
+   * 403 приходит и на неверный ключ, и на неподтверждённый домен отправителя.
+   * Разбираем по тексту: иначе подсказка уводит чинить ключ, когда дело
+   * в адресе, с которого отправляем.
+   */
+  if (/domain is not verified|add and verify your domain/i.test(body)) {
+    throw mailError(`Resend не принял адрес отправителя: ${body}`, 'EFROM');
+  }
   if (res.status === 401 || res.status === 403) {
     throw mailError(`Resend не принял ключ: ${body}`, 'EAUTH');
   }
