@@ -52,34 +52,56 @@ export default function Header() {
     nav(to);
   };
 
-  /** Один и тот же ряд этикеток: в шапке на компьютере и под ней на телефоне */
+  /**
+   * Этикетки уровней с подписью: без неё «A1» и «B2» ни о чём не говорят
+   * тому, кто первый раз на сайте. На компьютере подпись стоит слева от
+   * этикеток, на телефоне — строкой над ними: в одну строку они не влезают.
+   */
   const levelChips = (
     <Stack
-      direction="row"
-      spacing={{ xs: 0.75, sm: 1 }}
+      direction={{ xs: 'column', md: 'row' }}
+      spacing={{ xs: 0.75, md: 1.5 }}
       useFlexGap
-      sx={{ alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}
+      sx={{ alignItems: 'center', justifyContent: 'center' }}
     >
-      {levels.map((l) => (
-        <Chip
-          key={l.id}
-          component={RouterLink}
-          to={`/catalog?level=${l.id}`}
-          clickable
-          label={l.code}
-          sx={{
-            fontFamily: GREEK_FONT,
-            fontWeight: 900,
-            fontSize: { xs: 15, sm: 16 },
-            height: { xs: 30, sm: 34 },
-            px: { xs: 0.5, sm: 0.75 },
-            bgcolor: YELLOW,
-            color: INK,
-            border: `2px solid ${INK}`,
-            '&:hover': { bgcolor: '#FFE056' },
-          }}
-        />
-      ))}
+      <Typography
+        sx={{
+          fontWeight: 800,
+          fontSize: { xs: 14, md: 15 },
+          color: 'common.white',
+          whiteSpace: 'nowrap',
+          lineHeight: 1.2,
+        }}
+      >
+        Выберите ваш уровень
+      </Typography>
+      <Stack
+        direction="row"
+        spacing={{ xs: 0.75, sm: 1 }}
+        useFlexGap
+        sx={{ alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}
+      >
+        {levels.map((l) => (
+          <Chip
+            key={l.id}
+            component={RouterLink}
+            to={`/catalog?level=${l.id}`}
+            clickable
+            label={l.code}
+            sx={{
+              fontFamily: GREEK_FONT,
+              fontWeight: 900,
+              fontSize: { xs: 15, sm: 16 },
+              height: { xs: 30, sm: 34 },
+              px: { xs: 0.5, sm: 0.75 },
+              bgcolor: YELLOW,
+              color: INK,
+              border: `2px solid ${INK}`,
+              '&:hover': { bgcolor: '#FFE056' },
+            }}
+          />
+        ))}
+      </Stack>
     </Stack>
   );
 
