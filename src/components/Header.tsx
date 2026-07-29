@@ -67,7 +67,7 @@ export default function Header() {
       <Typography
         sx={{
           fontWeight: 800,
-          fontSize: { xs: 14, md: 15 },
+          fontSize: { xs: 28, md: 30 },
           color: 'common.white',
           whiteSpace: 'nowrap',
           lineHeight: 1.2,
