@@ -143,6 +143,9 @@ export default function Header() {
                 minWidth: 0,
                 display: { xs: 'none', md: 'flex' },
                 justifyContent: 'center',
+                // сдвиг вправо примерно на сантиметр — по центру промежутка
+                // блок казался слишком прижатым к левому краю
+                transform: 'translateX(38px)',
               }}
             >
               {levelChips}
