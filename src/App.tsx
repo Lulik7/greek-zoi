@@ -1,17 +1,33 @@
+import { lazy, Suspense } from 'react';
 import { Alert, Box, CircularProgress, Container } from '@mui/material';
 import { Route, Routes } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import HomePage from './pages/HomePage';
 import CatalogPage from './pages/CatalogPage';
-import AllTracksPage from './pages/AllTracksPage';
 import SubscribePage from './pages/SubscribePage';
-import AccountPage from './pages/AccountPage';
-import AdminPage from './pages/admin/AdminPage';
-import ResetPasswordPage from './pages/ResetPasswordPage';
 import StatusBanners from './components/StatusBanners';
 import SiteDecor from './components/SiteDecor';
 import { useApp } from './store/AppContext';
+
+/*
+ * Страницы, которые нужны не всем и не сразу, грузятся отдельными файлами
+ * при первом заходе на них. Тяжелее всего админка со всеми вкладками —
+ * ученику она не нужна, и качать её ему незачем.
+ */
+const AdminPage = lazy(() => import('./pages/admin/AdminPage'));
+const AccountPage = lazy(() => import('./pages/AccountPage'));
+const AllTracksPage = lazy(() => import('./pages/AllTracksPage'));
+const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage'));
+
+/** Пока подгружается страница — тот же кружок, что и при запуске сайта */
+function PageLoading() {
+  return (
+    <Box sx={{ display: 'grid', placeItems: 'center', minHeight: '50vh' }}>
+      <CircularProgress />
+    </Box>
+  );
+}
 
 export default function App() {
   const { loading, connectionError } = useApp();
@@ -54,16 +70,18 @@ export default function App() {
             </Container>
           )}
           <StatusBanners />
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/catalog" element={<CatalogPage />} />
-            <Route path="/all" element={<AllTracksPage />} />
-            <Route path="/subscribe" element={<SubscribePage />} />
-            <Route path="/account" element={<AccountPage />} />
-            <Route path="/reset" element={<ResetPasswordPage />} />
-            <Route path="/admin" element={<AdminPage />} />
-            <Route path="*" element={<HomePage />} />
-          </Routes>
+          <Suspense fallback={<PageLoading />}>
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/catalog" element={<CatalogPage />} />
+              <Route path="/all" element={<AllTracksPage />} />
+              <Route path="/subscribe" element={<SubscribePage />} />
+              <Route path="/account" element={<AccountPage />} />
+              <Route path="/reset" element={<ResetPasswordPage />} />
+              <Route path="/admin" element={<AdminPage />} />
+              <Route path="*" element={<HomePage />} />
+            </Routes>
+          </Suspense>
         </Box>
         <Footer />
       </Box>
