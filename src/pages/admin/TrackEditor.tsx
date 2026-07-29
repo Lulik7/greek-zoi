@@ -13,7 +13,6 @@ import {
   Divider,
   FormControl,
   FormControlLabel,
-  IconButton,
   InputLabel,
   MenuItem,
   OutlinedInput,
@@ -21,15 +20,11 @@ import {
   Stack,
   Switch,
   TextField,
-  Tooltip,
   Typography,
   useMediaQuery,
   useTheme,
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import DeleteIcon from '@mui/icons-material/Delete';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
-import ContentPasteIcon from '@mui/icons-material/ContentPaste';
 import type { Level, LyricLine, Topic, Track } from '../../types';
 import { useApp } from '../../store/AppContext';
 import { isVideoPageUrl } from '../../lib/video';
@@ -64,8 +59,6 @@ const EMPTY: Track = {
 
 export default function TrackEditor({ open, track, levels, topics, onClose, onSave }: Props) {
   const [draft, setDraft] = useState<Track>(EMPTY);
-  const [bulk, setBulk] = useState('');
-  const [bulkOpen, setBulkOpen] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploaded, setUploaded] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -97,71 +90,38 @@ export default function TrackEditor({ open, track, levels, topics, onClose, onSa
       setDraft(track ? { ...track, lyrics: track.lyrics.map((l) => ({ ...l })) } : { ...EMPTY });
       setUploaded(null);
       setUploadError('');
-      setBulk('');
-      setBulkOpen(false);
     }
   }, [open, track]);
 
   const set = <K extends keyof Track>(key: K, value: Track[K]) =>
     setDraft((d) => ({ ...d, [key]: value }));
 
-  const setLine = (i: number, patch: Partial<LyricLine>) =>
-    setDraft((d) => ({
-      ...d,
-      lyrics: d.lyrics.map((l, idx) => (idx === i ? { ...l, ...patch } : l)),
-    }));
-
-  const addLine = () =>
-    setDraft((d) => ({ ...d, lyrics: [...d.lyrics, { el: '', ru: '', time: undefined }] }));
-
-  const removeLine = (i: number) =>
-    setDraft((d) => ({ ...d, lyrics: d.lyrics.filter((_, idx) => idx !== i) }));
-
-  /**
-   * Массовая вставка текста: строки вида
-   *   0:12 | Καλημέρα | Доброе утро
-   * Время и перевод не обязательны.
-   *
-   * Разбор вынесен отдельно от записи в черновик: то же самое нужно
-   * при сохранении, если админ вставил текст и не нажал «Разобрать».
+  /*
+   * Текст материала вводится целиком: в одно поле весь оригинал, в другое
+   * весь перевод. Строки сопоставляются по порядку — первая с первой,
+   * вторая со второй. Так текст песни просто вставляется из документа,
+   * а не набивается по строчке.
    */
-  const parseBulk = (raw: string): LyricLine[] =>
-    raw
-      .split('\n')
-      .map((raw) => raw.trim())
-      .filter(Boolean)
-      .map((raw) => {
-        const parts = raw.split('|').map((p) => p.trim());
-        let time: number | undefined;
-        let el = parts[0] ?? '';
-        let ru = parts[1] ?? '';
-        const stamp = /^(\d{1,2}):(\d{2})(?:\.(\d+))?$/.exec(parts[0] ?? '');
-        if (stamp && parts.length >= 2) {
-          time = Number(stamp[1]) * 60 + Number(stamp[2]);
-          el = parts[1] ?? '';
-          ru = parts[2] ?? '';
-        } else if (/^\d+(\.\d+)?$/.test(parts[0] ?? '') && parts.length >= 2) {
-          time = Number(parts[0]);
-          el = parts[1] ?? '';
-          ru = parts[2] ?? '';
-        }
-        return { time, el, ru };
-      });
+  const elText = draft.lyrics.map((l) => l.el).join('\n');
+  const ruText = draft.lyrics.map((l) => l.ru).join('\n');
 
-  const applyBulk = () => {
-    setDraft((d) => ({ ...d, lyrics: parseBulk(bulk) }));
-    setBulk('');
-    setBulkOpen(false);
+  const setLyrics = (nextEl: string, nextRu: string) => {
+    const el = nextEl.split('\n');
+    const ru = nextRu.split('\n');
+    const lines: LyricLine[] = [];
+    for (let i = 0; i < Math.max(el.length, ru.length); i += 1) {
+      lines.push({ el: el[i] ?? '', ru: ru[i] ?? '' });
+    }
+    setDraft((d) => ({ ...d, lyrics: lines }));
   };
 
-  /**
-   * Сохранение. Если в окне вставки остался неразобранный текст, разбираем
-   * его сами: раньше такой текст молча пропадал — админ вставлял строки,
-   * жал «Сохранить», и материал уходил с нулём строк.
-   */
+  /** Пустые строки в конце в базу не пишем — они появляются от лишних переносов */
   const handleSave = () => {
-    const pending = bulk.trim() ? parseBulk(bulk) : null;
-    onSave(pending && pending.length ? { ...draft, lyrics: pending } : draft);
+    const lyrics = [...draft.lyrics];
+    while (lyrics.length && !lyrics[lyrics.length - 1].el.trim() && !lyrics[lyrics.length - 1].ru.trim()) {
+      lyrics.pop();
+    }
+    onSave({ ...draft, lyrics });
   };
 
   const pickFile = async (file?: File | null) => {
@@ -374,91 +334,36 @@ export default function TrackEditor({ open, track, levels, topics, onClose, onSa
 
           <Divider />
 
-          <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center' }}>
-            <Typography variant="subtitle1">Текст с переводом ({draft.lyrics.length})</Typography>
-            <Stack direction="row" spacing={1}>
-              <Button size="small" startIcon={<ContentPasteIcon />} onClick={() => setBulkOpen((v) => !v)}>
-                Вставить текст целиком
-              </Button>
-              <Button size="small" startIcon={<AddIcon />} onClick={addLine}>
-                Строка
-              </Button>
-            </Stack>
-          </Stack>
+          <Typography variant="subtitle1">Текст с переводом</Typography>
+          <Typography variant="body2" color="text.secondary">
+            Вставьте текст целиком в левое поле, перевод — в правое. Строки встают друг
+            напротив друга: первая строка перевода относится к первой строке оригинала.
+            Пустую строку можно оставить, чтобы отделить куплет.
+          </Typography>
 
-          {bulkOpen && (
-            <Box sx={{ bgcolor: 'action.hover', p: 2, borderRadius: 2 }}>
-              <Typography variant="caption" color="text.secondary">
-                По одной строке. Формат: <code>0:12 | Καλημέρα | Доброе утро</code>. Время и
-                перевод не обязательны.
-              </Typography>
-              <TextField
-                value={bulk}
-                onChange={(e) => setBulk(e.target.value)}
-                fullWidth
-                multiline
-                minRows={5}
-                autoFocus
-                placeholder={'Вставьте сюда текст материала\nпо одной строке'}
-                sx={{ mt: 1, bgcolor: 'background.paper' }}
-              />
-              <Button variant="contained" size="small" sx={{ mt: 1 }} onClick={applyBulk}>
-                Разобрать и заменить текст
-              </Button>
-              {bulk.trim() && (
-                <Typography variant="caption" sx={{ display: 'block', mt: 1, color: 'warning.dark' }}>
-                  Текст ещё не разобран. Нажмите кнопку выше — или просто сохраните материал,
-                  разберём сами.
-                </Typography>
-              )}
-            </Box>
-          )}
-
-          <Stack spacing={1}>
-            {draft.lyrics.map((line, i) => (
-              <Stack
-                key={i}
-                direction={{ xs: 'column', sm: 'row' }}
-                spacing={1}
-                sx={{
-                  alignItems: { sm: 'flex-start' },
-                  p: { xs: 1.5, sm: 0 },
-                  borderRadius: 2,
-                  bgcolor: { xs: 'action.hover', sm: 'transparent' },
-                }}
-              >
-                <TextField
-                  label="сек"
-                  size="small"
-                  value={line.time ?? ''}
-                  onChange={(e) =>
-                    setLine(i, { time: e.target.value === '' ? undefined : Number(e.target.value) })
-                  }
-                  sx={{ width: { xs: '100%', sm: 90 } }}
-                  type="number"
-                />
-                <TextField
-                  label="Греческий"
-                  size="small"
-                  value={line.el}
-                  onChange={(e) => setLine(i, { el: e.target.value })}
-                  fullWidth
-                />
-                <TextField
-                  label="Перевод"
-                  size="small"
-                  value={line.ru}
-                  onChange={(e) => setLine(i, { ru: e.target.value })}
-                  fullWidth
-                />
-                <Tooltip title="Удалить строку">
-                  <IconButton onClick={() => removeLine(i)}>
-                    <DeleteIcon />
-                  </IconButton>
-                </Tooltip>
-              </Stack>
-            ))}
+          <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
+            <TextField
+              label="Текст на греческом"
+              value={elText}
+              onChange={(e) => setLyrics(e.target.value, ruText)}
+              fullWidth
+              multiline
+              minRows={10}
+              placeholder={'Καλημέρα, αγάπη μου\nΟ ήλιος βγήκε στο βουνό'}
+            />
+            <TextField
+              label="Перевод"
+              value={ruText}
+              onChange={(e) => setLyrics(elText, e.target.value)}
+              fullWidth
+              multiline
+              minRows={10}
+              placeholder={'Доброе утро, любовь моя\nСолнце взошло над горой'}
+            />
           </Stack>
+          <Typography variant="caption" color="text.secondary">
+            Строк текста: {draft.lyrics.length}
+          </Typography>
         </Stack>
       </DialogContent>
       <DialogActions sx={{ px: 3, py: 2 }}>
