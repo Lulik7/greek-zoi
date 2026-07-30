@@ -50,7 +50,6 @@ const EMPTY: Track = {
   levelIds: [],
   topicIds: [],
   audioUrl: '',
-  videoUrl: '',
   free: false,
   lyrics: [],
   note: '',
@@ -61,13 +60,9 @@ const EMPTY: Track = {
 export default function TrackEditor({ open, track, levels, topics, onClose, onSave }: Props) {
   const [draft, setDraft] = useState<Track>(EMPTY);
   const fileRef = useRef<HTMLInputElement>(null);
-  const videoRef = useRef<HTMLInputElement>(null);
   const [uploaded, setUploaded] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
-  const [videoUploaded, setVideoUploaded] = useState<string | null>(null);
-  const [videoUploading, setVideoUploading] = useState(false);
-  const [videoError, setVideoError] = useState('');
   const { uploadFile, saveTopics } = useApp();
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
@@ -95,8 +90,6 @@ export default function TrackEditor({ open, track, levels, topics, onClose, onSa
       setDraft(track ? { ...track, lyrics: track.lyrics.map((l) => ({ ...l })) } : { ...EMPTY });
       setUploaded(null);
       setUploadError('');
-      setVideoUploaded(null);
-      setVideoError('');
     }
   }, [open, track]);
 
@@ -146,23 +139,7 @@ export default function TrackEditor({ open, track, levels, topics, onClose, onSa
     }
   };
 
-  const pickVideo = async (file?: File | null) => {
-    if (!file) return;
-    setVideoUploading(true);
-    setVideoError('');
-    try {
-      const url = await uploadFile(file);
-      setVideoUploaded(file.name);
-      set('videoUrl', url);
-    } catch (e) {
-      setVideoError(e instanceof Error ? e.message : 'Не удалось загрузить видео');
-    } finally {
-      setVideoUploading(false);
-    }
-  };
-
-  // материал годится, если есть хотя бы что-то одно: звук или видео
-  const valid = draft.title.trim() && (draft.audioUrl.trim() || draft.videoUrl.trim());
+  const valid = draft.title.trim() && draft.audioUrl.trim();
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth fullScreen={fullScreen}>
@@ -285,6 +262,7 @@ export default function TrackEditor({ open, track, levels, topics, onClose, onSa
                   set('audioUrl', e.target.value);
                 }}
                 fullWidth
+                required
                 error={isVideoPageUrl(draft.audioUrl)}
                 helperText={
                   isVideoPageUrl(draft.audioUrl)
@@ -324,74 +302,6 @@ export default function TrackEditor({ open, track, levels, topics, onClose, onSa
             )}
             {draft.audioUrl && (
               <Box component="audio" src={draft.audioUrl} controls sx={{ width: '100%', mt: 1.5 }} />
-            )}
-          </Box>
-
-          {/*
-            Видео к материалу — не обязательно. Годится короткая запись: разбор
-            фразы, сценка, песня с картинкой. Файл ложится на диск сервера,
-            поэтому длинные записи лучше держать во внешнем хранилище и
-            вставлять сюда ссылкой.
-          */}
-          <Box>
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ alignItems: 'center' }}>
-              <TextField
-                label="Ссылка на видео (mp4) — необязательно"
-                value={draft.videoUrl}
-                onChange={(e) => {
-                  setVideoUploaded(null);
-                  set('videoUrl', e.target.value);
-                }}
-                fullWidth
-                error={isVideoPageUrl(draft.videoUrl)}
-                helperText={
-                  isVideoPageUrl(draft.videoUrl)
-                    ? 'Это ссылка на страницу YouTube, а не на файл — в материале она не откроется. Загрузите файл кнопкой справа. Ролики с YouTube ставятся на главной странице, в настройках сайта.'
-                    : 'Короткая запись к материалу. Файл до 200 МБ — загрузите кнопкой справа или вставьте ссылку'
-                }
-              />
-              <Button
-                variant="outlined"
-                startIcon={videoUploading ? <CircularProgress size={18} /> : <UploadFileIcon />}
-                onClick={() => videoRef.current?.click()}
-                disabled={videoUploading}
-                sx={{ whiteSpace: 'nowrap', width: { xs: '100%', sm: 'auto' } }}
-              >
-                {videoUploading ? 'Загрузка…' : 'Загрузить видео'}
-              </Button>
-              <input
-                ref={videoRef}
-                type="file"
-                accept="video/*"
-                hidden
-                onChange={(e) => {
-                  void pickVideo(e.target.files?.[0]);
-                  e.target.value = '';
-                }}
-              />
-            </Stack>
-            {videoUploading && (
-              <Alert severity="info" sx={{ mt: 1 }}>
-                Видео загружается — это дольше, чем звук. Не закрывайте окно.
-              </Alert>
-            )}
-            {videoUploaded && (
-              <Alert severity="success" sx={{ mt: 1 }}>
-                Видео «{videoUploaded}» загружено на сервер. Ссылка подставлена в поле выше.
-              </Alert>
-            )}
-            {videoError && (
-              <Alert severity="error" sx={{ mt: 1 }}>
-                {videoError}
-              </Alert>
-            )}
-            {draft.videoUrl && (
-              <Box
-                component="video"
-                src={draft.videoUrl}
-                controls
-                sx={{ width: '100%', maxHeight: 320, mt: 1.5, borderRadius: 2, bgcolor: 'common.black' }}
-              />
             )}
           </Box>
 
