@@ -43,6 +43,11 @@ export interface Track {
    * `/api/audio/<id>` и отдаёт пустую строку, если материал закрыт.
    */
   audioUrl: string;
+  /**
+   * Короткое видео к материалу — необязательно. Ведёт себя как `audioUrl`:
+   * ученику приходит `/api/video/<id>`, у закрытого материала — пустая строка.
+   */
+  videoUrl: string;
   /** true — доступен всем без подписки */
   free: boolean;
   lyrics: LyricLine[];

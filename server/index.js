@@ -148,8 +148,9 @@ function publicTrack(track, user) {
     published: track.published,
     createdAt: track.createdAt,
     locked: !unlocked,
-    // ссылка идёт через сервер: доступ проверяется на каждый запрос аудио
-    audioUrl: unlocked ? `/api/audio/${track.id}` : '',
+    // ссылка идёт через сервер: доступ проверяется на каждый запрос аудио и видео
+    audioUrl: unlocked && track.audioUrl ? `/api/audio/${track.id}` : '',
+    videoUrl: unlocked && track.videoUrl ? `/api/video/${track.id}` : '',
     lyrics: unlocked ? track.lyrics : [],
     note: unlocked ? track.note : '',
   };
@@ -176,23 +177,38 @@ app.get('/api/bootstrap', (req, res) => {
   });
 });
 
-app.get('/api/audio/:id', (req, res) => {
-  const user = currentUser(req);
-  const track = store.getTrack(req.params.id);
-  if (!track || !track.published) return res.status(404).json({ error: 'Материал не найден' });
-  if (!hasAccess(user, track)) return res.status(403).json({ error: 'Материал доступен по подписке' });
+/**
+ * Отдаёт файл материала — звук или видео. Ссылка на файл наружу не уходит:
+ * ученик запрашивает /api/audio/<id> или /api/video/<id>, и доступ проверяется
+ * на каждый запрос. Иначе ссылку на закрытый материал можно было бы переслать.
+ */
+function serveTrackFile(kind) {
+  const field = kind === 'video' ? 'videoUrl' : 'audioUrl';
+  const missing = kind === 'video' ? 'Видео не загружено' : 'Аудио не загружено';
 
-  const url = track.audioUrl;
-  if (!url) return res.status(404).json({ error: 'Аудио не загружено' });
+  return (req, res) => {
+    const user = currentUser(req);
+    const track = store.getTrack(req.params.id);
+    if (!track || !track.published) return res.status(404).json({ error: 'Материал не найден' });
+    if (!hasAccess(user, track)) {
+      return res.status(403).json({ error: 'Материал доступен по подписке' });
+    }
 
-  if (url.startsWith('/media/')) {
-    const file = join(UPLOADS, url.slice('/media/'.length));
-    if (!existsSync(file)) return res.status(404).json({ error: 'Файл не найден' });
-    return res.sendFile(file);
-  }
-  // внешнее хранилище (R2, Bunny, SoundCloud и т. п.)
-  return res.redirect(302, url);
-});
+    const url = track[field];
+    if (!url) return res.status(404).json({ error: missing });
+
+    if (url.startsWith('/media/')) {
+      const file = join(UPLOADS, url.slice('/media/'.length));
+      if (!existsSync(file)) return res.status(404).json({ error: 'Файл не найден' });
+      return res.sendFile(file);
+    }
+    // внешнее хранилище (R2, Bunny, SoundCloud и т. п.)
+    return res.redirect(302, url);
+  };
+}
+
+app.get('/api/audio/:id', serveTrackFile('audio'));
+app.get('/api/video/:id', serveTrackFile('video'));
 
 app.post('/api/events', (req, res) => {
   const user = currentUser(req);
@@ -354,14 +370,24 @@ const upload = multer({
       cb(null, `${Date.now()}-${safe || `audio${extname(file.originalname)}`}`);
     },
   }),
-  limits: { fileSize: 80 * 1024 * 1024 },
-  // принимаем аудио (материалы) и картинки (фон блока с названием).
+  /*
+   * 200 МБ — на короткое видео с запасом. Больше ставить незачем: файлы лежат
+   * на диске сервера, а он на тарифе Render небольшой, и длинные видео его
+   * быстро заполнят. Долгие записи лучше держать во внешнем хранилище
+   * и вставлять ссылкой.
+   */
+  limits: { fileSize: 200 * 1024 * 1024 },
+  // принимаем аудио и видео (материалы) и картинки (фон блока с названием).
   // часть браузеров присылает application/octet-stream, поэтому смотрим и расширение
   fileFilter: (_req, file, cb) => {
-    const byType = file.mimetype.startsWith('audio/') || file.mimetype.startsWith('image/');
-    const byExt = /\.(mp3|m4a|aac|wav|ogg|oga|opus|flac|weba|jpe?g|png|webp|avif)$/i.test(
-      file.originalname,
-    );
+    const byType =
+      file.mimetype.startsWith('audio/') ||
+      file.mimetype.startsWith('video/') ||
+      file.mimetype.startsWith('image/');
+    const byExt =
+      /\.(mp3|m4a|aac|wav|ogg|oga|opus|flac|weba|mp4|m4v|mov|webm|ogv|jpe?g|png|webp|avif)$/i.test(
+        file.originalname,
+      );
     cb(null, byType || byExt);
   },
 });
@@ -369,7 +395,7 @@ const upload = multer({
 app.use('/media', express.static(UPLOADS));
 
 app.post('/api/admin/upload', requireAdmin, upload.single('file'), (req, res) => {
-  if (!req.file) return res.status(400).json({ error: 'Нужен аудиофайл или изображение' });
+  if (!req.file) return res.status(400).json({ error: 'Нужен аудио- или видеофайл либо изображение' });
   res.json({ url: `/media/${req.file.filename}`, name: req.file.originalname, size: req.file.size });
 });
 

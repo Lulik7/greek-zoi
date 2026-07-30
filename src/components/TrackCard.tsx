@@ -33,6 +33,8 @@ export default function TrackCard({ track, levels, topics, onLocked, defaultOpen
 
   // сервер сам решает, что показывать: у закрытых материалов нет ни аудио, ни текста
   const unlocked = track.locked === undefined ? track.free || hasAccess : !track.locked;
+  // материал бывает только с видео — тогда и кнопка называется по-другому
+  const videoOnly = !!track.videoUrl && !track.audioUrl;
 
   const levelChips = useMemo(
     () => levels.filter((l) => track.levelIds.includes(l.id)),
@@ -131,20 +133,44 @@ export default function TrackCard({ track, levels, topics, onLocked, defaultOpen
               onClick={handleOpen}
               sx={{ flexGrow: { xs: 1, sm: 0 } }}
             >
-              {unlocked ? (open ? 'Свернуть' : 'Слушать') : 'Открыть'}
+              {unlocked
+                ? open
+                  ? 'Свернуть'
+                  : videoOnly
+                    ? 'Смотреть'
+                    : 'Слушать'
+                : 'Открыть'}
             </Button>
           </Stack>
         </Stack>
 
         <Collapse in={open && unlocked} unmountOnExit>
           <Divider sx={{ my: 2 }} />
-          <Box
-            component="audio"
-            src={track.audioUrl}
-            controls
-            preload="none"
-            sx={{ width: '100%' }}
-          />
+          {/* у материала может быть только звук, только видео или и то и другое */}
+          {track.videoUrl && (
+            <Box
+              component="video"
+              src={track.videoUrl}
+              controls
+              preload="none"
+              sx={{
+                width: '100%',
+                maxHeight: { xs: 260, sm: 420 },
+                borderRadius: 2,
+                bgcolor: 'common.black',
+                mb: track.audioUrl ? 1.5 : 0,
+              }}
+            />
+          )}
+          {track.audioUrl && (
+            <Box
+              component="audio"
+              src={track.audioUrl}
+              controls
+              preload="none"
+              sx={{ width: '100%' }}
+            />
+          )}
 
           {/* текст показывается целиком сразу — без подсветки по строкам */}
           <Box sx={{ mt: 2, bgcolor: 'action.hover', borderRadius: 2, p: { xs: 1.5, sm: 2 } }}>

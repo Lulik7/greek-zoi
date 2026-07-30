@@ -48,6 +48,7 @@ db.exec(`
     artist TEXT NOT NULL DEFAULT '',
     kind TEXT NOT NULL DEFAULT 'song',
     audio_url TEXT NOT NULL DEFAULT '',
+    video_url TEXT NOT NULL DEFAULT '',
     free INTEGER NOT NULL DEFAULT 0,
     note TEXT NOT NULL DEFAULT '',
     published INTEGER NOT NULL DEFAULT 1,
@@ -134,6 +135,12 @@ if (!userColumns.includes('email_verified')) {
   db.exec('ALTER TABLE users ADD COLUMN email_verified INTEGER NOT NULL DEFAULT 0');
 }
 
+// видео в материале появилось позже аудио — у старых баз колонки нет
+const trackColumns = db.prepare('PRAGMA table_info(tracks)').all().map((c) => c.name);
+if (!trackColumns.includes('video_url')) {
+  db.exec("ALTER TABLE tracks ADD COLUMN video_url TEXT NOT NULL DEFAULT ''");
+}
+
 const uid = (prefix) => `${prefix}-${Math.random().toString(36).slice(2, 9)}${Date.now().toString(36).slice(-3)}`;
 
 // ---------------------------------------------------------------- наполнение
@@ -204,6 +211,7 @@ export function getTracks() {
     artist: r.artist,
     kind: r.kind,
     audioUrl: r.audio_url,
+    videoUrl: r.video_url ?? '',
     free: !!r.free,
     note: r.note,
     published: !!r.published,
@@ -224,8 +232,9 @@ export function createTrack(t, forcedId, forcedCreatedAt) {
   const id = forcedId ?? uid('t');
   const createdAt = forcedCreatedAt ?? new Date().toISOString();
   db.prepare(
-    `INSERT INTO tracks (id, title, title_ru, artist, kind, audio_url, free, note, published, created_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO tracks (id, title, title_ru, artist, kind, audio_url, video_url, free, note,
+                         published, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
   ).run(
     id,
     t.title ?? '',
@@ -233,6 +242,7 @@ export function createTrack(t, forcedId, forcedCreatedAt) {
     t.artist ?? '',
     t.kind === 'dialogue' ? 'dialogue' : 'song',
     t.audioUrl ?? '',
+    t.videoUrl ?? '',
     t.free ? 1 : 0,
     t.note ?? '',
     t.published === false ? 0 : 1,
@@ -246,7 +256,7 @@ export function updateTrack(id, t) {
   const exists = db.prepare('SELECT id FROM tracks WHERE id = ?').get(id);
   if (!exists) return null;
   db.prepare(
-    `UPDATE tracks SET title = ?, title_ru = ?, artist = ?, kind = ?, audio_url = ?,
+    `UPDATE tracks SET title = ?, title_ru = ?, artist = ?, kind = ?, audio_url = ?, video_url = ?,
        free = ?, note = ?, published = ? WHERE id = ?`,
   ).run(
     t.title ?? '',
@@ -254,6 +264,7 @@ export function updateTrack(id, t) {
     t.artist ?? '',
     t.kind === 'dialogue' ? 'dialogue' : 'song',
     t.audioUrl ?? '',
+    t.videoUrl ?? '',
     t.free ? 1 : 0,
     t.note ?? '',
     t.published === false ? 0 : 1,
