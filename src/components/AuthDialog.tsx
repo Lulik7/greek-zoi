@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import {
   Alert,
-  Box,
   Button,
   Dialog,
   DialogContent,
@@ -188,13 +187,6 @@ export default function AuthDialog({ open, onClose, reason, onSuccess, initialMo
               Вернуться ко входу
             </Link>
           )}
-
-          <Box sx={{ bgcolor: 'action.hover', p: 1.5, borderRadius: 2 }}>
-            <Typography variant="caption" color="text.secondary">
-              Демо-доступы: <b>admin@zoi.gr / admin123</b> (администратор),{' '}
-              <b>student@mail.ru / demo123</b> (ученик без подписки)
-            </Typography>
-          </Box>
         </Stack>
       </DialogContent>
     </Dialog>
