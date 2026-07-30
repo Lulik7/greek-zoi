@@ -47,6 +47,11 @@ export default function SubscribePage() {
    */
   const cardPayment = db.features.stripe;
   const s = db.settings;
+  // какой именно тариф оплачен: подписка одна, и на остальных карточках
+  // не должно быть написано «уже активна»
+  const activePlan = hasSubscription
+    ? (s.plans.find((p) => p.id === user?.subscription.planId) ?? null)
+    : null;
   const contactHref = s.contactTelegram
     ? `https://t.me/${s.contactTelegram.replace('@', '')}`
     : s.contactPhone
@@ -106,7 +111,7 @@ export default function SubscribePage() {
       )}
       {hasSubscription && !isAdmin && (
         <Alert severity="success" sx={{ mb: 3 }}>
-          Подписка активна до{' '}
+          {activePlan ? `Тариф «${activePlan.title}» оплачен. Подписка активна до ` : 'Подписка активна до '}
           {user?.subscription.until
             ? new Date(user.subscription.until).toLocaleDateString('ru-RU')
             : '—'}
@@ -201,7 +206,15 @@ export default function SubscribePage() {
                   onClick={() => buy(p.id)}
                   disabled={hasSubscription || isAdmin || busy === p.id}
                 >
-                  {isAdmin ? 'Не требуется' : hasSubscription ? 'Уже активна' : busy === p.id ? 'Открываем оплату…' : 'Оформить'}
+                  {isAdmin
+                    ? 'Не требуется'
+                    : activePlan?.id === p.id
+                      ? 'Ваш тариф'
+                      : hasSubscription
+                        ? 'Подписка уже есть'
+                        : busy === p.id
+                          ? 'Открываем оплату…'
+                          : 'Оформить'}
                 </Button>
               )}
             </CardContent>
