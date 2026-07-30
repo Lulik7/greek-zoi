@@ -27,8 +27,7 @@ export default function AdminPage() {
     return (
       <Container maxWidth="sm" sx={{ py: 6 }}>
         <Alert severity="warning">
-          Раздел доступен только администратору. Войдите под учётной записью администратора
-          (в демо: admin@zoi.gr / admin123).
+          Раздел доступен только администратору. Войдите под учётной записью администратора.
         </Alert>
       </Container>
     );

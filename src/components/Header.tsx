@@ -235,13 +235,11 @@ export default function Header() {
               </>
             ) : (
               <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-                {/* как LOG IN / SIGN UP в референс-видео: контур + жёлтая таблетка */}
                 <Button
                   variant="outlined"
                   size="small"
                   onClick={() => openAuth('login')}
                   sx={{
-                    display: { xs: 'none', sm: 'inline-flex' },
                     px: 2,
                     color: 'common.white',
                     borderColor: 'rgba(255,255,255,0.75)',
@@ -259,26 +257,6 @@ export default function Header() {
                   }}
                 >
                   Войти
-                </Button>
-                <Button
-                  variant="contained"
-                  color="secondary"
-                  size="small"
-                  onClick={() => openAuth('register')}
-                  sx={{
-                    px: { xs: 2, sm: 2.5 },
-                    color: INK,
-                    bgcolor: YELLOW,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.04em',
-                    fontWeight: 900,
-                    fontSize: 13,
-                    border: `2px solid ${INK}`,
-                    boxShadow: `0 3px 0 ${INK}`,
-                    '&:hover': { bgcolor: '#FFE056', boxShadow: `0 4px 0 ${INK}` },
-                  }}
-                >
-                  Регистрация
                 </Button>
               </Stack>
             )}
@@ -355,18 +333,6 @@ export default function Header() {
                   }}
                 >
                   Войти
-                </Button>
-                <Button
-                  fullWidth
-                  variant="contained"
-                  color="secondary"
-                  onClick={() => {
-                    setDrawer(false);
-                    openAuth('register');
-                  }}
-                  sx={{ color: INK, fontWeight: 900 }}
-                >
-                  Регистрация
                 </Button>
               </Stack>
             )}
