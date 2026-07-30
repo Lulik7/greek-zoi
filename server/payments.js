@@ -27,6 +27,16 @@ export const stripeEnabled = () => !!stripe;
 export async function createCheckoutSession(user, plan) {
   const session = await stripe.checkout.sessions.create({
     mode: 'payment',
+    /*
+     * Managed Payments — надстройка Stripe, где продавцом становится он сам
+     * и сам считает налог. У новых счетов она включена по умолчанию и требует
+     * налоговый код у каждого товара, а товар здесь создаётся на лету из
+     * тарифа в админке — назначать ему налоговый код некому. Отключаем:
+     * продавец — школа, налоги на ней, как и было задумано.
+     * Если школа захочет, чтобы налогом занимался Stripe, надстройку включают
+     * обратно, но тогда у каждого тарифа должен появиться налоговый код.
+     */
+    managed_payments: { enabled: false },
     customer_email: user.email,
     client_reference_id: user.id,
     metadata: { userId: user.id, planId: plan.id },
