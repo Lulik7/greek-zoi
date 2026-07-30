@@ -258,22 +258,32 @@ function seedPassword(envName, devDefault, label) {
   return generated;
 }
 
-export const USERS = [
-  {
-    id: 'u-admin',
-    // почта администратора задаётся переменной ADMIN_EMAIL
-    email: process.env.ADMIN_EMAIL || 'admin@zoi.gr',
-    name: 'Зоя Павловская',
-    password: seedPassword('ADMIN_PASSWORD', 'admin123', 'администратор admin@zoi.gr'),
-    role: 'admin',
-    subscription: { active: true, planId: 'year', until: '2030-01-01T00:00:00.000Z' },
-  },
-  {
+const ADMIN = {
+  id: 'u-admin',
+  // почта администратора задаётся переменной ADMIN_EMAIL
+  email: process.env.ADMIN_EMAIL || 'admin@zoi.gr',
+  name: 'Зоя Павловская',
+  password: seedPassword('ADMIN_PASSWORD', 'admin123', 'администратор admin@zoi.gr'),
+  role: 'admin',
+  subscription: { active: true, planId: 'year', until: '2030-01-01T00:00:00.000Z' },
+};
+
+/*
+ * Ученик без подписки — чтобы на своей машине было под кем проверять,
+ * как сайт выглядит для постороннего. В продакшене такой записи быть
+ * не должно: на живом сайте это чужая учётная запись в списке учеников.
+ * Пароль ему подбирается только там, где он создаётся, — иначе в журнал
+ * живого сервера зря печатался бы пароль от несуществующей записи.
+ */
+export const USERS = [ADMIN];
+
+if (process.env.NODE_ENV !== 'production') {
+  USERS.push({
     id: 'u-demo',
     email: 'student@mail.ru',
     name: 'Ученик Демо',
     password: seedPassword('DEMO_PASSWORD', 'demo123', 'демо-ученик student@mail.ru'),
     role: 'student',
     subscription: { active: false, planId: null, until: null },
-  },
-];
+  });
+}
