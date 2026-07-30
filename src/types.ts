@@ -116,7 +116,7 @@ export interface Payment {
 
 /** Что подключено на сервере — влияет на тексты в интерфейсе */
 export interface Features {
-  /** true — оплата идёт через Stripe, false — демо-режим без списания */
+  /** true — на сайте работает оплата картой; false — оплата только переводом */
   stripe: boolean;
   /** true — письма реально отправляются */
   email: boolean;

@@ -59,11 +59,12 @@ export const api = {
     request<User>('/api/auth/reset', json('POST', { token, password })),
 
   /**
-   * Оформление подписки. Если Stripe подключён, возвращает ссылку на платёжную
-   * страницу; если нет — сервер включает подписку сразу (демо-режим).
+   * Оформление подписки: возвращает ссылку на платёжную страницу Stripe.
+   * Если ключи Stripe не заданы, сервер отвечает ошибкой — платить нечем,
+   * подписку в таком случае школа включает вручную в админке.
    */
   checkout: (planId: string) =>
-    request<{ url?: string; demo?: boolean; user?: User }>('/api/checkout', json('POST', { planId })),
+    request<{ url?: string }>('/api/checkout', json('POST', { planId })),
 
   // ---------- контент (админка) ----------
   createTrack: (track: Omit<Track, 'id' | 'createdAt'>) =>

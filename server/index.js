@@ -322,9 +322,16 @@ app.post('/api/checkout', requireAuth, async (req, res) => {
   }
 
   if (!stripeEnabled()) {
-    // демо-режим: оплаты нет, включаем подписку сразу
-    const user = store.activateSubscription(req.user.id, planId);
-    return res.json({ demo: true, user });
+    /*
+     * Ключей Stripe нет — оплата картой не работает. Подписку в этом случае
+     * школа включает вручную в админке тому, кто заплатил переводом.
+     * Открывать доступ здесь нельзя: запрос приходит из браузера, и любой
+     * зарегистрировавшийся получил бы полный каталог бесплатно.
+     */
+    return res.status(503).json({
+      error: 'Оплата картой пока не подключена. Напишите нам — откроем доступ.',
+      contactToPay: true,
+    });
   }
 
   try {

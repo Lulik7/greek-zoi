@@ -40,6 +40,19 @@ export default function SubscribePage() {
 
   if (!db) return null;
 
+  /*
+   * Пока ключи Stripe не заданы, оплата картой не работает: подписку школа
+   * включает вручную тому, кто заплатил переводом. Поэтому кнопка тарифа
+   * ведёт не на оплату, а в переписку — Telegram, иначе WhatsApp, иначе почта.
+   */
+  const cardPayment = db.features.stripe;
+  const s = db.settings;
+  const contactHref = s.contactTelegram
+    ? `https://t.me/${s.contactTelegram.replace('@', '')}`
+    : s.contactPhone
+      ? `https://wa.me/${s.contactPhone.replace(/[^\d]/g, '')}`
+      : `mailto:${s.contactEmail}`;
+
   const buy = async (planId: string) => {
     if (!user) {
       setPendingPlan(planId);
@@ -166,26 +179,52 @@ export default function SubscribePage() {
                   </ListItem>
                 ))}
               </List>
-              <Button
-                fullWidth
-                size="large"
-                variant={p.highlighted ? 'contained' : 'outlined'}
-                sx={{ mt: 2 }}
-                onClick={() => buy(p.id)}
-                disabled={hasSubscription || isAdmin || busy === p.id}
-              >
-                {isAdmin ? 'Не требуется' : hasSubscription ? 'Уже активна' : busy === p.id ? 'Открываем оплату…' : 'Оформить'}
-              </Button>
+              {!cardPayment && !hasSubscription && !isAdmin ? (
+                <Button
+                  fullWidth
+                  size="large"
+                  variant={p.highlighted ? 'contained' : 'outlined'}
+                  sx={{ mt: 2 }}
+                  component="a"
+                  href={contactHref}
+                  target="_blank"
+                  rel="noopener"
+                >
+                  Написать для оплаты
+                </Button>
+              ) : (
+                <Button
+                  fullWidth
+                  size="large"
+                  variant={p.highlighted ? 'contained' : 'outlined'}
+                  sx={{ mt: 2 }}
+                  onClick={() => buy(p.id)}
+                  disabled={hasSubscription || isAdmin || busy === p.id}
+                >
+                  {isAdmin ? 'Не требуется' : hasSubscription ? 'Уже активна' : busy === p.id ? 'Открываем оплату…' : 'Оформить'}
+                </Button>
+              )}
             </CardContent>
           </Card>
         ))}
       </Box>
 
-      {db.features.stripe && (
+      {cardPayment ? (
         <Alert icon={<LockIcon />} severity="info" sx={{ mt: 4 }}>
           Оплата проходит на защищённой странице Stripe. Данные карты на наш сайт не попадают,
           доступ открывается автоматически сразу после подтверждения платежа.
         </Alert>
+      ) : (
+        !hasSubscription &&
+        !isAdmin && (
+          <Alert severity="info" sx={{ mt: 4 }}>
+            Оплата картой на сайте пока не подключена. Напишите нам — подскажем, как перевести
+            оплату, и откроем доступ ко всем материалам.
+            {s.contactTelegram && ` Telegram: ${s.contactTelegram}.`}
+            {s.contactPhone && ` Viber / WhatsApp: ${s.contactPhone}.`}
+            {s.contactEmail && ` Почта: ${s.contactEmail}.`}
+          </Alert>
+        )
       )}
 
       {hasSubscription && (

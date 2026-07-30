@@ -30,7 +30,7 @@ interface AppContextValue {
   /** Возвращает ссылку подтверждения, если письма не настроены (дев-режим) */
   register: (email: string, password: string, name: string) => Promise<string | undefined>;
   logout: () => Promise<void>;
-  /** Ведёт на оплату Stripe либо включает подписку в демо-режиме */
+  /** Ведёт на платёжную страницу Stripe */
   checkout: (planId: string) => Promise<void>;
   resendVerification: () => Promise<string | undefined>;
   saveTrack: (t: Track) => Promise<void>;
