@@ -160,9 +160,13 @@ export default function SubscribePage() {
             sx={{
               borderColor: p.highlighted ? 'secondary.main' : undefined,
               borderWidth: p.highlighted ? 2 : 1,
+              // карточки в ряду одной высоты, кнопка прижата к низу:
+              // иначе у тарифа с тремя строками списка она съезжает ниже соседних
+              display: 'flex',
+              flexDirection: 'column',
             }}
           >
-            <CardContent>
+            <CardContent sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
               <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center' }}>
                 <Typography variant="h6">{p.title}</Typography>
                 {p.highlighted && <Chip size="small" color="secondary" label="Выгодно" />}
@@ -174,7 +178,7 @@ export default function SubscribePage() {
                 на {p.periodDays} дней
               </Typography>
               <Divider sx={{ my: 2 }} />
-              <List dense disablePadding>
+              <List dense disablePadding sx={{ flexGrow: 1 }}>
                 {p.features.map((f) => (
                   <ListItem key={f} disableGutters>
                     <ListItemIcon sx={{ minWidth: 32 }}>
