@@ -134,6 +134,21 @@ if (!userColumns.includes('email_verified')) {
   db.exec('ALTER TABLE users ADD COLUMN email_verified INTEGER NOT NULL DEFAULT 0');
 }
 
+/*
+ * Столбец от отменённой затеи с загрузкой видео в материалы: саму затею
+ * откатили, а в базах, успевших её застать, столбец остался пустым. Убираем,
+ * чтобы схема совпадала с кодом. Ошибку здесь глушим намеренно: несовпадение
+ * схемы сайту не мешает, а падение при запуске оставило бы школу без сайта.
+ */
+const trackColumns = db.prepare('PRAGMA table_info(tracks)').all().map((c) => c.name);
+if (trackColumns.includes('video_url')) {
+  try {
+    db.exec('ALTER TABLE tracks DROP COLUMN video_url');
+  } catch (e) {
+    console.warn('[db] не удалось убрать столбец video_url:', e.message);
+  }
+}
+
 const uid = (prefix) => `${prefix}-${Math.random().toString(36).slice(2, 9)}${Date.now().toString(36).slice(-3)}`;
 
 // ---------------------------------------------------------------- наполнение
