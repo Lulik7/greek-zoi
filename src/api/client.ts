@@ -52,6 +52,10 @@ export const api = {
       json('POST'),
     ),
 
+  /** Код из письма отправляет страница /verify — в самой ссылке его серверу не передаём */
+  confirmEmail: (token: string) =>
+    request<User>('/api/auth/confirm-email', json('POST', { token })),
+
   forgotPassword: (email: string) =>
     request<{ ok: true; resetLink?: string }>('/api/auth/forgot', json('POST', { email })),
 

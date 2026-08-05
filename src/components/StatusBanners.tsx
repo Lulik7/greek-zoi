@@ -4,8 +4,8 @@ import { Alert, Button, Container, Link, Stack } from '@mui/material';
 import { useApp } from '../store/AppContext';
 
 /**
- * Полоса уведомлений над содержимым: результат перехода по ссылке из письма
- * и напоминание подтвердить почту.
+ * Полоса уведомлений над содержимым: смена пароля и напоминание подтвердить
+ * почту. Результат подтверждения показывает сама страница /verify.
  */
 export default function StatusBanners() {
   const { user, db, resendVerification } = useApp();
@@ -14,7 +14,6 @@ export default function StatusBanners() {
   const [devLink, setDevLink] = useState('');
   const [hidden, setHidden] = useState(false);
 
-  const verify = params.get('verify');
   const passwordChanged = params.get('password') === 'changed';
 
   const clear = (key: string) => {
@@ -24,21 +23,11 @@ export default function StatusBanners() {
   };
 
   const needsVerification = !!user && !user.emailVerified && !hidden;
-  if (!verify && !passwordChanged && !needsVerification) return null;
+  if (!passwordChanged && !needsVerification) return null;
 
   return (
     <Container maxWidth="lg" sx={{ pt: 2 }}>
       <Stack spacing={1.5}>
-        {verify === 'ok' && (
-          <Alert severity="success" onClose={() => clear('verify')}>
-            Почта подтверждена. Спасибо!
-          </Alert>
-        )}
-        {verify === 'expired' && (
-          <Alert severity="warning" onClose={() => clear('verify')}>
-            Ссылка устарела или уже использована. Войдите и запросите письмо заново.
-          </Alert>
-        )}
         {passwordChanged && (
           <Alert severity="success" onClose={() => clear('password')}>
             Пароль изменён, вы вошли в аккаунт.

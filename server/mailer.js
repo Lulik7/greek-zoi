@@ -164,9 +164,14 @@ async function send({ to, subject, html, text }) {
   return { delivered: true };
 }
 
-/** Ссылка ведёт прямо в API: там почта помечается подтверждённой и человек возвращается на сайт */
+/*
+ * Ссылка ведёт на обычную страницу сайта, а не прямо в API: адрес вида
+ * /api/auth/verify?token=… Google Safe Browsing пометил как мошеннический,
+ * и Chrome показывал ученику красный предупреждающий экран вместо сайта.
+ * Страница /verify сама отправляет код на сервер отдельным запросом.
+ */
 export function verificationUrl(token) {
-  return `${config.publicUrl}/api/auth/verify?token=${encodeURIComponent(token)}`;
+  return `${config.publicUrl}/verify?token=${encodeURIComponent(token)}`;
 }
 
 export function resetUrl(token) {

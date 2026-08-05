@@ -252,13 +252,23 @@ app.post('/api/auth/logout', (req, res) => {
 
 app.get('/api/auth/me', (req, res) => res.json(currentUser(req)));
 
-/** Переход по ссылке из письма: подтверждаем почту и возвращаем ученика на сайт. */
-app.get('/api/auth/verify', (req, res) => {
-  const user = store.consumeToken(req.query.token, 'verify');
-  if (!user) return res.redirect(`${config.publicUrl}/?verify=expired`);
+/*
+ * Подтверждение почты. Запрос шлёт страница /verify, на которую ведёт ссылка
+ * из письма.
+ *
+ * Раньше ссылка вела прямо сюда, на адрес вида /api/auth/verify?token=…
+ * Google Safe Browsing счёл такой адрес мошенническим — длинный случайный код
+ * в ссылке из письма, сразу впускающий в аккаунт, для их автоматики выглядит
+ * как фишинг, — и Chrome показывал ученику красный предупреждающий экран
+ * вместо сайта. Поэтому ссылка теперь ведёт на обычную страницу сайта,
+ * а код уходит на сервер отдельным запросом, невидимым для проверки ссылок.
+ */
+app.post('/api/auth/confirm-email', (req, res) => {
+  const user = store.consumeToken(req.body?.token, 'verify');
+  if (!user) return res.status(400).json({ error: 'Ссылка устарела или уже использована' });
   store.setEmailVerified(user.id);
   issueSession(res, user); // заодно впускаем в аккаунт
-  res.redirect(`${config.publicUrl}/?verify=ok`);
+  res.json(store.getUserById(user.id));
 });
 
 app.post('/api/auth/resend-verification', requireAuth, async (req, res) => {

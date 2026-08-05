@@ -19,6 +19,7 @@ const AdminPage = lazy(() => import('./pages/admin/AdminPage'));
 const AccountPage = lazy(() => import('./pages/AccountPage'));
 const AllTracksPage = lazy(() => import('./pages/AllTracksPage'));
 const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage'));
+const VerifyEmailPage = lazy(() => import('./pages/VerifyEmailPage'));
 
 /** Пока подгружается страница — тот же кружок, что и при запуске сайта */
 function PageLoading() {
@@ -78,6 +79,7 @@ export default function App() {
               <Route path="/subscribe" element={<SubscribePage />} />
               <Route path="/account" element={<AccountPage />} />
               <Route path="/reset" element={<ResetPasswordPage />} />
+              <Route path="/verify" element={<VerifyEmailPage />} />
               <Route path="/admin" element={<AdminPage />} />
               <Route path="*" element={<HomePage />} />
             </Routes>
