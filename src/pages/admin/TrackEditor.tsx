@@ -163,8 +163,21 @@ export default function TrackEditor({ open, track, levels, topics, onClose, onSa
           </Stack>
 
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+            {/* от типа зависит значок материала в каталоге и фильтр «песни / диалоги» */}
+            <FormControl fullWidth sx={{ maxWidth: { sm: 260 } }}>
+              <InputLabel>Тип материала</InputLabel>
+              <Select
+                label="Тип материала"
+                value={draft.kind}
+                onChange={(e) => set('kind', e.target.value as Track['kind'])}
+              >
+                <MenuItem value="song">Песня</MenuItem>
+                <MenuItem value="dialogue">Текст / диалог</MenuItem>
+              </Select>
+            </FormControl>
             <TextField
-              label="Исполнитель"
+              // у диалога исполнителя нет — там уместнее автор или источник
+              label={draft.kind === 'song' ? 'Исполнитель' : 'Автор или источник'}
               value={draft.artist}
               onChange={(e) => set('artist', e.target.value)}
               fullWidth
