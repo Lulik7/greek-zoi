@@ -25,6 +25,7 @@ import MusicNoteIcon from '@mui/icons-material/MusicNote';
 import ForumIcon from '@mui/icons-material/Forum';
 import { useApp } from '../store/AppContext';
 import { normalize } from '../lib/search';
+import { usePageMeta } from '../lib/pageMeta';
 import type { Track } from '../types';
 
 export default function AllTracksPage() {
@@ -33,6 +34,11 @@ export default function AllTracksPage() {
   const theme = useTheme();
   const compact = useMediaQuery(theme.breakpoints.down('md'));
   const [q, setQ] = useState('');
+
+  usePageMeta(
+    'Все материалы',
+    'Полный список песен и диалогов школы: название, уровень, тема и доступ. Поиск по всему собранию.',
+  );
 
   useEffect(() => {
     logEvent({ type: 'page', path: '/all' });

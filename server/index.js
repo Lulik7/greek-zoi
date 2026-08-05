@@ -131,6 +131,39 @@ function tooOften(key, ms = 60_000) {
   return false;
 }
 
+/*
+ * Защита от подбора пароля. Считаем неудачные попытки входа по адресу почты:
+ * после пяти подряд вход по этому адресу закрыт на четверть часа, даже если
+ * пароль назовут верный. Удачный вход счётчик обнуляет.
+ *
+ * Считаем именно по почте, а не по адресу в сети: сайт стоит за Cloudflare и
+ * Render, до сервера доходит адрес их узла, и по нему все ученики выглядели бы
+ * как один человек — пятеро ошиблись паролем, и вход закрыт для всех.
+ */
+const LOGIN_FAIL_LIMIT = 5;
+const LOGIN_FAIL_WINDOW = 15 * 60_000;
+const loginFails = new Map();
+
+/** Сколько ещё ждать после серии неудачных попыток, мс. 0 — можно пробовать. */
+function loginBlockedFor(email) {
+  const rec = loginFails.get(email);
+  if (!rec) return 0;
+  const passed = Date.now() - rec.at;
+  if (passed > LOGIN_FAIL_WINDOW) {
+    loginFails.delete(email);
+    return 0;
+  }
+  return rec.count >= LOGIN_FAIL_LIMIT ? LOGIN_FAIL_WINDOW - passed : 0;
+}
+
+function noteLoginFail(email) {
+  const rec = loginFails.get(email);
+  // окно отсчитывается от последней неудачи, иначе перебор пересидели бы паузами
+  const fresh = !rec || Date.now() - rec.at > LOGIN_FAIL_WINDOW;
+  loginFails.set(email, { count: fresh ? 1 : rec.count + 1, at: Date.now() });
+  if (loginFails.size > 5000) loginFails.clear();
+}
+
 const hasAccess = (user, track) => track.free || user?.role === 'admin' || !!user?.subscription.active;
 
 /** Убирает из материала всё, что не положено видеть без подписки. */
@@ -239,8 +272,23 @@ app.post('/api/auth/register', async (req, res) => {
 
 app.post('/api/auth/login', (req, res) => {
   const { email, password } = req.body ?? {};
+  const login = String(email ?? '').trim().toLowerCase();
+
+  const wait = loginBlockedFor(login);
+  if (wait) {
+    const minutes = Math.ceil(wait / 60_000);
+    return res.status(429).json({
+      error: `Слишком много неудачных попыток. Попробуйте через ${minutes} мин.`,
+    });
+  }
+
   const user = store.verifyUser(String(email ?? '').trim(), String(password ?? ''));
-  if (!user) return res.status(401).json({ error: 'Неверная почта или пароль' });
+  if (!user) {
+    noteLoginFail(login);
+    return res.status(401).json({ error: 'Неверная почта или пароль' });
+  }
+
+  loginFails.delete(login);
   issueSession(res, user);
   res.json(user);
 });
@@ -498,6 +546,43 @@ app.delete('/api/admin/users/:id', requireAdmin, (req, res) => {
   if (req.params.id === req.user.id) return res.status(400).json({ error: 'Нельзя удалить себя' });
   store.deleteUser(req.params.id);
   res.json({ ok: true });
+});
+
+// --------------------------------------------------------- для поисковиков
+
+/*
+ * Адрес сайта берём из настроек, а не пишем в файл: на своей машине это
+ * localhost, на сервере — greek-zoi.com, и карта сайта должна совпадать
+ * с тем, откуда её скачали, иначе Google её не примет.
+ *
+ * Закрываем от обхода личные разделы, служебные запросы и папку с загруженным
+ * звуком: в поиске ей делать нечего, а материалы по подписке тем более.
+ */
+app.get('/robots.txt', (_req, res) => {
+  res.type('text/plain').send(
+    [
+      'User-agent: *',
+      'Disallow: /admin',
+      'Disallow: /account',
+      'Disallow: /api/',
+      'Disallow: /media/',
+      'Disallow: /reset',
+      'Disallow: /verify',
+      '',
+      `Sitemap: ${config.publicUrl}/sitemap.xml`,
+      '',
+    ].join('\n'),
+  );
+});
+
+app.get('/sitemap.xml', (_req, res) => {
+  const pages = ['/', '/catalog', '/all', '/subscribe'];
+  const body = pages
+    .map((p) => `  <url>\n    <loc>${config.publicUrl}${p}</loc>\n  </url>`)
+    .join('\n');
+  res
+    .type('application/xml')
+    .send(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${body}\n</urlset>\n`);
 });
 
 // ------------------------------------------------------- статика и запуск

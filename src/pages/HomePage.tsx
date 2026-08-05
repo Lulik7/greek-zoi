@@ -16,6 +16,7 @@ import VideoBlock from '../components/VideoBlock';
 import FloatingDecor from '../components/FloatingDecor';
 import AccessibilityPanel from '../components/AccessibilityPanel';
 import { useLogoLines } from '../lib/title';
+import { usePageMeta } from '../lib/pageMeta';
 import {
   cartoonTitle,
   GREEK_FONT,
@@ -66,6 +67,11 @@ export default function HomePage() {
   const { db, logEvent } = useApp();
   const [line1, line2] = useLogoLines();
   const { hash } = useLocation();
+
+  usePageMeta(
+    '',
+    'Онлайн-школа греческого языка Зои Павловской: песни и диалоги с текстами и переводом, разбор по уровням от A1 до Γ2. Часть материалов открыта бесплатно.',
+  );
 
   useEffect(() => {
     logEvent({ type: 'page', path: '/' });

@@ -13,6 +13,7 @@ import { useApp } from '../store/AppContext';
 import SearchBar from '../components/SearchBar';
 import TrackCard from '../components/TrackCard';
 import { filterTracks, interpretQuery } from '../lib/search';
+import { usePageMeta } from '../lib/pageMeta';
 import { HERO_BLUE, INK, YELLOW } from '../theme';
 
 export default function CatalogPage() {
@@ -24,6 +25,11 @@ export default function CatalogPage() {
   const levelParam = params.get('level');
   const topicParam = params.get('topic');
   const trackParam = params.get('track');
+
+  usePageMeta(
+    'Каталог материалов',
+    'Греческие песни и диалоги с текстом и переводом: поиск по уровню, теме и словам. Часть материалов открыта без подписки.',
+  );
 
   useEffect(() => {
     logEvent({ type: 'page', path: '/catalog', label: q || levelParam || topicParam || 'all' });

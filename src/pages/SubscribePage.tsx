@@ -20,6 +20,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import LockIcon from '@mui/icons-material/Lock';
 import { useApp } from '../store/AppContext';
 import AuthDialog from '../components/AuthDialog';
+import { usePageMeta } from '../lib/pageMeta';
 
 export default function SubscribePage() {
   const { db, user, isAdmin, hasSubscription, checkout, resendVerification, logEvent } = useApp();
@@ -33,6 +34,11 @@ export default function SubscribePage() {
 
   const paid = params.get('paid') === '1';
   const canceled = params.get('canceled') === '1';
+
+  usePageMeta(
+    'Подписка',
+    'Доступ ко всем материалам школы греческого языка: месяц, полгода или год. Оплата картой на защищённой странице.',
+  );
 
   useEffect(() => {
     logEvent({ type: 'page', path: '/subscribe' });
