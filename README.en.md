@@ -11,9 +11,70 @@ admin area, without a developer.
 Built and deployed solo: frontend, backend, database, payments, transactional email, hosting
 and DNS.
 
-**Stack:** React 19, TypeScript, MUI, React Router, Vite on the client; Node.js, Express 5 and
-SQLite (`node:sqlite`) on the server. Deployed on Render with a persistent disk; payments via
-Stripe Checkout; email via Resend.
+## Tech stack
+
+**Frontend**
+
+- React 19 — function components, hooks, `lazy` + `Suspense` route splitting
+- TypeScript 6
+- MUI 9 — component library, theming, responsive breakpoints
+- React Router 7 — client-side routing
+- Vite 8 — dev server, production bundling, content-hashed assets
+
+**Backend**
+
+- Node.js 22, ES modules
+- Express 5 — REST API, static serving, SPA fallback
+- `node:sqlite` — Node's built-in SQLite driver, no native build step
+- multer 2 — audio uploads filtered by MIME type and extension
+
+**Database**
+
+- SQLite in WAL mode, single-file storage on a persistent disk
+- Normalised schema with many-to-many joins (materials ↔ levels, materials ↔ topics)
+- Startup migrations driven by `PRAGMA table_info`
+
+**Authentication and security**
+
+- jsonwebtoken 9 — signed JWT sessions in httpOnly, SameSite, secure cookies
+- bcryptjs 3 — password hashing
+- Server-side authorisation: role checks on admin routes, per-request subscription checks on media
+- Response filtering: locked content stripped from API payloads before serialisation
+- Login throttling; single-use hashed email tokens with a TTL
+- HSTS, X-Content-Type-Options, X-Frame-Options, Referrer-Policy, http→https redirect
+
+**Payments**
+
+- Stripe 22 SDK — Checkout Sessions in one-off `payment` mode
+- Webhook fulfilment with `constructEvent` signature verification
+- Idempotency via payment-id lookup before access is granted
+- Inline `price_data` generated from admin-managed plans, no dashboard products
+
+**Email**
+
+- Resend HTTP API, chosen over SMTP because the host blocks outbound SMTP ports
+- nodemailer 9 retained as an SMTP fallback transport
+- DKIM, SPF and DMARC configured on the sending domain
+
+**Infrastructure**
+
+- Render Web Service with a mounted persistent disk for the database and uploads
+- Automatic deploys from GitHub `main`
+- Cloudflare — DNS, TLS termination, CDN
+- Namecheap — domain and DNS records
+
+**SEO**
+
+- Server-generated `robots.txt` and `sitemap.xml`
+- Per-route title, meta description and canonical URL
+- Open Graph tags for link previews
+- Google Search Console verification and sitemap submission
+
+**Tooling**
+
+- oxlint for linting, `tsc -b` type checking in the build pipeline
+- concurrently for parallel dev processes
+- Git / GitHub
 
 ## Running locally
 
