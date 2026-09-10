@@ -134,9 +134,13 @@ export default function SubscribePage() {
                 color="inherit"
                 size="small"
                 onClick={async () => {
-                  await resendVerification();
-                  setNotice('Письмо отправлено ещё раз — проверьте почту.');
-                  setError('');
+                  try {
+                    await resendVerification();
+                    setNotice('Письмо отправлено ещё раз — проверьте почту.');
+                    setError('');
+                  } catch (e) {
+                    setError(e instanceof Error ? e.message : 'Не удалось отправить письмо');
+                  }
                 }}
               >
                 Выслать письмо
