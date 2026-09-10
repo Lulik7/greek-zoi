@@ -361,8 +361,13 @@ app.post('/api/auth/resend-verification', requireAuth, async (req, res) => {
     return res.status(429).json({ error: 'Письмо уже отправлено. Проверьте почту через минуту.' });
   }
   const token = store.createToken(req.user.id, 'verify', VERIFY_TTL);
-  const sent = await sendVerification(req.user, token);
-  res.json({ ok: true, verificationLink: sent.delivered ? undefined : sent.url });
+  try {
+    const sent = await sendVerification(req.user, token);
+    res.json({ ok: true, verificationLink: sent.delivered ? undefined : sent.url });
+  } catch (e) {
+    console.warn('[auth] не удалось отправить письмо:', e.message);
+    res.status(502).json({ error: 'Не удалось отправить письмо. Попробуйте позже.' });
+  }
 });
 
 app.post('/api/auth/forgot', async (req, res) => {
