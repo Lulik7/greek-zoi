@@ -54,8 +54,9 @@ export default function UsersAdmin() {
   return (
     <>
       <Typography color="text.secondary" sx={{ mb: 2 }}>
-        Здесь видно, кто зарегистрировался и у кого активна подписка. Подписку можно выдать
-        вручную — например, ученику, который оплатил переводом.
+        Здесь видно, кто зарегистрировался и у кого активна подписка. Подписку можно подарить
+        вручную — например, ученику, который оплатил переводом. Чтобы отменить подарок, просто
+        выключите переключатель.
       </Typography>
 
       {compact ? (
@@ -81,10 +82,12 @@ export default function UsersAdmin() {
                     <MenuItem value="student">Ученик</MenuItem>
                     <MenuItem value="admin">Администратор</MenuItem>
                   </Select>
-                  <Switch
-                    checked={u.subscription.active}
-                    onChange={(e) => toggleSub(u, e.target.checked)}
-                  />
+                  <Tooltip title={u.subscription.active ? 'Отменить подарок' : 'Подарить подписку'}>
+                    <Switch
+                      checked={u.subscription.active}
+                      onChange={(e) => toggleSub(u, e.target.checked)}
+                    />
+                  </Tooltip>
                   <Chip size="small" variant="outlined" label={`до ${until(u)}`} />
                   <Box sx={{ flexGrow: 1 }} />
                   <IconButton color="error" disabled={u.id === me?.id} onClick={() => remove(u)}>
@@ -103,7 +106,7 @@ export default function UsersAdmin() {
                 <TableCell>Имя</TableCell>
                 <TableCell>Почта</TableCell>
                 <TableCell>Роль</TableCell>
-                <TableCell align="center">Подписка</TableCell>
+                <TableCell align="center">Подписка (подарок)</TableCell>
                 <TableCell>Действует до</TableCell>
                 <TableCell align="right" />
               </TableRow>
@@ -125,11 +128,13 @@ export default function UsersAdmin() {
                     </Select>
                   </TableCell>
                   <TableCell align="center">
-                    <Switch
-                      size="small"
-                      checked={u.subscription.active}
-                      onChange={(e) => toggleSub(u, e.target.checked)}
-                    />
+                    <Tooltip title={u.subscription.active ? 'Отменить подарок' : 'Подарить подписку'}>
+                      <Switch
+                        size="small"
+                        checked={u.subscription.active}
+                        onChange={(e) => toggleSub(u, e.target.checked)}
+                      />
+                    </Tooltip>
                   </TableCell>
                   <TableCell>
                     {u.subscription.until ? (
