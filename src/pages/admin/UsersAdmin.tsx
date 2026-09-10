@@ -4,9 +4,7 @@ import {
   CardContent,
   Chip,
   IconButton,
-  MenuItem,
   Paper,
-  Select,
   Stack,
   Switch,
   Table,
@@ -73,15 +71,11 @@ export default function UsersAdmin() {
                   useFlexGap
                   sx={{ mt: 1.5, gap: 1, flexWrap: 'wrap', alignItems: 'center' }}
                 >
-                  <Select
+                  <Chip
                     size="small"
-                    value={u.role}
-                    disabled={u.id === me?.id}
-                    onChange={(e) => saveUser({ ...u, role: e.target.value as User['role'] })}
-                  >
-                    <MenuItem value="student">Ученик</MenuItem>
-                    <MenuItem value="admin">Администратор</MenuItem>
-                  </Select>
+                    label={u.role === 'admin' ? 'Администратор' : 'Ученик'}
+                    color={u.role === 'admin' ? 'primary' : 'default'}
+                  />
                   <Tooltip title={u.subscription.active ? 'Отменить подарок' : 'Подарить подписку'}>
                     <Switch
                       checked={u.subscription.active}
@@ -117,15 +111,11 @@ export default function UsersAdmin() {
                   <TableCell>{u.name}</TableCell>
                   <TableCell>{u.email}</TableCell>
                   <TableCell>
-                    <Select
+                    <Chip
                       size="small"
-                      value={u.role}
-                      disabled={u.id === me?.id}
-                      onChange={(e) => saveUser({ ...u, role: e.target.value as User['role'] })}
-                    >
-                      <MenuItem value="student">Ученик</MenuItem>
-                      <MenuItem value="admin">Администратор</MenuItem>
-                    </Select>
+                      label={u.role === 'admin' ? 'Администратор' : 'Ученик'}
+                      color={u.role === 'admin' ? 'primary' : 'default'}
+                    />
                   </TableCell>
                   <TableCell align="center">
                     <Tooltip title={u.subscription.active ? 'Отменить подарок' : 'Подарить подписку'}>
