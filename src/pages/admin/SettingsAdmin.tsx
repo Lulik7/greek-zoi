@@ -272,7 +272,7 @@ export default function SettingsAdmin() {
                       s.plans.map((x, idx) => (idx === i ? { ...x, priceEur: Number(e.target.value) } : x)),
                     )
                   }
-                  sx={{ width: 120 }}
+                  sx={{ width: { xs: '100%', sm: 110 }, flexShrink: 0 }}
                 />
                 <TextField
                   size="small"
@@ -285,7 +285,7 @@ export default function SettingsAdmin() {
                       s.plans.map((x, idx) => (idx === i ? { ...x, periodDays: Number(e.target.value) } : x)),
                     )
                   }
-                  sx={{ width: 110 }}
+                  sx={{ width: { xs: '100%', sm: 100 }, flexShrink: 0 }}
                 />
                 <TextField
                   size="small"
