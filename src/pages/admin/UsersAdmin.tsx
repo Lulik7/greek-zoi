@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import {
   Box,
   Card,
@@ -13,6 +14,7 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  TextField,
   Tooltip,
   Typography,
   useMediaQuery,
@@ -22,6 +24,49 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { useApp } from '../../store/AppContext';
 import type { User } from '../../types';
 
+/** ISO-дата → значение для <input type="date"> (YYYY-MM-DD) в местном времени. */
+const toInputDate = (iso: string | null) => {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '';
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+};
+
+/**
+ * Поле «Действует до». Сохраняет дату при уходе из поля (onBlur), а не на каждое нажатие —
+ * иначе при вводе года с клавиатуры улетали бы промежуточные значения вроде 0002-10-11.
+ * Доступ действует до конца выбранного дня.
+ */
+function SubUntilField({ user, onSave }: { user: User; onSave: (until: string) => void }) {
+  const initial = toInputDate(user.subscription.until);
+  const [value, setValue] = useState(initial);
+  useEffect(() => setValue(initial), [initial]);
+
+  const commit = () => {
+    if (!value || value === initial) return;
+    const d = new Date(`${value}T23:59:59`);
+    if (Number.isNaN(d.getTime()) || d.getFullYear() < 2000) {
+      setValue(initial);
+      return;
+    }
+    onSave(d.toISOString());
+  };
+
+  return (
+    <TextField
+      size="small"
+      type="date"
+      value={value}
+      onChange={(e) => setValue(e.target.value)}
+      onBlur={commit}
+      onKeyDown={(e) => e.key === 'Enter' && (e.target as HTMLInputElement).blur()}
+      slotProps={{ inputLabel: { shrink: true } }}
+      sx={{ width: 170 }}
+    />
+  );
+}
+
 export default function UsersAdmin() {
   const { db, user: me, saveUser, deleteUser } = useApp();
   const theme = useTheme();
@@ -29,7 +74,9 @@ export default function UsersAdmin() {
   if (!db) return null;
 
   const toggleSub = (u: User, on: boolean) => {
-    const plan = db.settings.plans[0];
+    // Берём тариф, который у ученика уже был; если его нет — первый в списке.
+    const plan =
+      db.settings.plans.find((p) => p.id === u.subscription.planId) ?? db.settings.plans[0];
     void saveUser({
       ...u,
       subscription: on
@@ -46,15 +93,24 @@ export default function UsersAdmin() {
     if (confirm(`Удалить пользователя ${u.email}?`)) void deleteUser(u.id);
   };
 
-  const until = (u: User) =>
-    u.subscription.until ? new Date(u.subscription.until).toLocaleDateString('ru-RU') : '—';
+  /** Ручная установка даты окончания: включает подписку и сохраняет тариф ученика. */
+  const setUntil = (u: User, until: string) => {
+    void saveUser({
+      ...u,
+      subscription: {
+        active: true,
+        planId: u.subscription.planId ?? db.settings.plans[0]?.id ?? null,
+        until,
+      },
+    });
+  };
 
   return (
     <>
       <Typography color="text.secondary" sx={{ mb: 2 }}>
         Здесь видно, кто зарегистрировался и у кого активна подписка. Подписку можно подарить
         вручную — например, ученику, который оплатил переводом. Чтобы отменить подарок, просто
-        выключите переключатель.
+        выключите переключатель. Дату окончания можно поправить вручную в поле «Действует до».
       </Typography>
 
       {compact ? (
@@ -82,7 +138,7 @@ export default function UsersAdmin() {
                       onChange={(e) => toggleSub(u, e.target.checked)}
                     />
                   </Tooltip>
-                  <Chip size="small" variant="outlined" label={`до ${until(u)}`} />
+                  <SubUntilField user={u} onSave={(until) => setUntil(u, until)} />
                   <Box sx={{ flexGrow: 1 }} />
                   <IconButton color="error" disabled={u.id === me?.id} onClick={() => remove(u)}>
                     <DeleteIcon />
@@ -127,11 +183,7 @@ export default function UsersAdmin() {
                     </Tooltip>
                   </TableCell>
                   <TableCell>
-                    {u.subscription.until ? (
-                      <Chip size="small" variant="outlined" label={until(u)} />
-                    ) : (
-                      '—'
-                    )}
+                    <SubUntilField user={u} onSave={(until) => setUntil(u, until)} />
                   </TableCell>
                   <TableCell align="right">
                     <Tooltip title={u.id === me?.id ? 'Нельзя удалить себя' : 'Удалить'}>
